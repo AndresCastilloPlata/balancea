@@ -1,5 +1,6 @@
 import 'package:balancea/presentation/widgets/home/balance_card.dart';
 import 'package:balancea/presentation/widgets/home/home_header.dart';
+import 'package:balancea/presentation/widgets/home/home_quick_actions.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -10,7 +11,16 @@ class HomeScreen extends StatelessWidget {
     return const Scaffold(
       body: SafeArea(
         child: Column(
-          children: [HomeHeader(), SizedBox(height: 20), BalanceCard()],
+          children: [
+            HomeHeader(),
+            SizedBox(height: 20),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: BalanceCard(),
+            ),
+            SizedBox(height: 30),
+            HomeQuickActions(),
+          ],
         ),
       ),
     );
