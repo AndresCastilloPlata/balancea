@@ -1,3 +1,4 @@
+import 'package:balancea/presentation/widgets/home/home_header.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -6,8 +7,17 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(
-        child: Text('Home Screen', style: TextStyle(color: Colors.white)),
+      body: SafeArea(
+        child: Column(
+          children: [
+            HomeHeader(),
+            SizedBox(height: 20),
+            Text(
+              "Aquí irá la tarjeta de saldo",
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        ),
       ),
     );
   }
