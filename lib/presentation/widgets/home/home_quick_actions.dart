@@ -11,29 +11,29 @@ class HomeQuickActions extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           _ActionButton(
-            icon: Icons.add_circle_outline,
-            label: 'Recargar',
+            icon: Icons.arrow_downward_rounded,
+            label: 'Ingreso',
             color: const Color(0xFF4ECDC4),
             onTap: () {
-              print('Recargar presionado');
+              print('Ingreso presionado');
             },
           ),
           _ActionButton(
-            icon: Icons.remove_circle_outline,
-            label: 'Enviar',
+            icon: Icons.arrow_upward_rounded,
+            label: 'Gasto',
             color: const Color(0xFFFF6B6B),
             onTap: () {
-              print('Enviar presionado');
+              print('Gasto presionado');
             },
           ),
           _ActionButton(
             icon: Icons.qr_code_scanner,
-            label: 'Escanear',
+            label: 'Scan',
             color: const Color(0xFF7C4DFF),
             onTap: () {},
           ),
           _ActionButton(
-            icon: Icons.more_horiz,
+            icon: Icons.grid_view_rounded,
             label: 'Más',
             color: Colors.white,
             onTap: () {},

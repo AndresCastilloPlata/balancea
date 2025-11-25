@@ -1,7 +1,5 @@
-import 'package:balancea/presentation/widgets/home/balance_card.dart';
-import 'package:balancea/presentation/widgets/home/home_header.dart';
-import 'package:balancea/presentation/widgets/home/home_quick_actions.dart';
 import 'package:flutter/material.dart';
+import '../widgets/home/home_widgets.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
