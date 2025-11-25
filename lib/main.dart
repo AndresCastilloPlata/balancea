@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:balancea/config/router/app_router.dart';
 
 void main() => runApp(const Balancea());
 
@@ -7,20 +8,13 @@ class Balancea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      routerConfig: appRouter,
       title: 'Balancea',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(
         useMaterial3: true,
       ).copyWith(scaffoldBackgroundColor: const Color(0xFF191A22)),
-      home: Scaffold(
-        body: const Center(
-          child: Text(
-            'Balancea Setup OK',
-            style: TextStyle(color: Colors.white, fontSize: 24),
-          ),
-        ),
-      ),
     );
   }
 }
