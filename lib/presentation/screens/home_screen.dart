@@ -8,17 +8,22 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            HomeHeader(),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: BalanceCard(),
-            ),
-            SizedBox(height: 30),
-            HomeQuickActions(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              HomeHeader(),
+              SizedBox(height: 20),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: BalanceCard(),
+              ),
+              SizedBox(height: 30),
+              HomeQuickActions(),
+              SizedBox(height: 30),
+              HomeTransactions(),
+              SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
