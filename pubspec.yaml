@@ -45,6 +45,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.7
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -58,8 +59,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  assets:
+    - assets/images/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -87,3 +88,12 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Configuración de flutter_native_splash
+flutter_native_splash:
+  color: "#191A22" # Nuestro color de fondo oscuro
+  image: assets/images/logo_neon.png # La ruta a nuestro logo
+  android_12:
+    image: assets/images/logo_neon.png # Necesario para Android 12+ que usa un icono circular
+    color: "#191A22"
+  fullscreen: true # Oculta la barra de estado para una experiencia inmersiva
