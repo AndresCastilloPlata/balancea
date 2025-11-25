@@ -1,5 +1,6 @@
-import 'package:balancea/presentation/screens/splash_screen.dart';
 import 'package:go_router/go_router.dart';
+import '../../presentation/screens/screens.dart';
+import 'package:balancea/presentation/widgets/shared/main_bottom_nav.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -8,6 +9,50 @@ final appRouter = GoRouter(
       path: '/',
       name: 'splash',
       builder: (context, state) => const SplashScreen(),
+    ),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          MainBottomNav(navigationShell: navigationShell),
+      branches: [
+        // Home:0
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        // Stats:1
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/stats',
+              builder: (context, state) => const StatsScreen(),
+            ),
+          ],
+        ),
+
+        //Transactions:2
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/transactions',
+              builder: (context, state) => const TransactionsScreen(),
+            ),
+          ],
+        ),
+
+        // Settings:3
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
+            ),
+          ],
+        ),
+      ],
     ),
     GoRoute(
       path: '/home',
