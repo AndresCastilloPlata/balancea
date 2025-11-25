@@ -13,11 +13,24 @@ class BalanceCard extends StatelessWidget {
 
       child: Stack(
         children: [
+          // Luces de fondo
+          const Positioned(
+            top: -20,
+            right: -20,
+            child: _DecorationLight(color: Color(0xFF4ECDC4)),
+          ),
+          // Luces de fondo
+          const Positioned(
+            bottom: -20,
+            left: -20,
+            child: _DecorationLight(color: Color(0xFFFF6B6B)),
+          ),
+
           // Efecto de vidrio
           ClipRRect(
             borderRadius: BorderRadius.circular(25),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
@@ -29,7 +42,7 @@ class BalanceCard extends StatelessWidget {
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      Colors.white.withValues(alpha: 0.15),
+                      Colors.white.withValues(alpha: 0.1),
                       Colors.white.withValues(alpha: 0.05),
                     ],
                   ),
@@ -56,9 +69,9 @@ class BalanceCard extends StatelessWidget {
                   '\$ 2,540.00',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 32,
+                    fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
+                    letterSpacing: -1.0,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -88,6 +101,24 @@ class BalanceCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _DecorationLight extends StatelessWidget {
+  final Color color;
+  const _DecorationLight({required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 150,
+      height: 150,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: color.withValues(alpha: 0.5),
+        boxShadow: [BoxShadow(color: color, blurRadius: 60, spreadRadius: 10)],
       ),
     );
   }
