@@ -5,50 +5,13 @@ class HomeTransactions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Titulo
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Transacciones Recientes',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              // Boton "ver todo"
-              GestureDetector(
-                onTap: () {
-                  print('ver todos');
-                },
-                child: const Text(
-                  'Ver todo',
-                  style: TextStyle(
-                    color: Color(0xFF4ECDC4),
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: _dummyTransactions.length,
-          itemBuilder: (BuildContext context, int index) {
-            final transaction = _dummyTransactions[index];
-            return _TransactionItem(transaction: transaction);
-          },
-        ),
-      ],
+    return ListView.builder(
+      padding: const EdgeInsets.only(top: 20, bottom: 20),
+      itemCount: _dummyTransactions.length,
+      itemBuilder: (BuildContext context, int index) {
+        final transaction = _dummyTransactions[index];
+        return _TransactionItem(transaction: transaction);
+      },
     );
   }
 }

@@ -19,7 +19,40 @@ class HomeScreen extends StatelessWidget {
             ),
             SizedBox(height: 30),
             HomeQuickActions(),
-            SizedBox(height: 30),
+            SizedBox(height: 20),
+
+            // zona titulo fijo
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Transacciones Recientes',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  // Boton "ver todo"
+                  GestureDetector(
+                    onTap: () {
+                      print('ver todos');
+                    },
+                    child: const Text(
+                      'Ver todo',
+                      style: TextStyle(
+                        color: Color(0xFF4ECDC4),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
 
             // zona movil
             Expanded(
@@ -36,10 +69,7 @@ class HomeScreen extends StatelessWidget {
                     topLeft: Radius.circular(30),
                     topRight: Radius.circular(30),
                   ),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(top: 20, bottom: 20),
-                    child: const HomeTransactions(),
-                  ),
+                  child: const HomeTransactions(),
                 ),
               ),
             ),
