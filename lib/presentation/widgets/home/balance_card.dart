@@ -79,42 +79,47 @@ class BalanceCard extends StatelessWidget {
                             style: TextStyle(
                               color: Colors.grey[300],
                               fontSize: 14,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-
-                          // Cuenta principal
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Text(
-                              'Premium ⭐',
-                              style: TextStyle(
-                                color: Color(0xFFFFD700),
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      // icono decorativo
+
+                      // Cuenta principal
                       Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withValues(alpha: 0.1),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
                         ),
-                        child: const Icon(
-                          Icons.wallet,
-                          color: Colors.white,
-                          size: 20,
+                        decoration: BoxDecoration(
+                          color: const Color(
+                            0xFFFFD700,
+                          ).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: const Color(
+                              0xFFFFD700,
+                            ).withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Text(
+                              'PREMIUM',
+                              style: TextStyle(
+                                color: Color(0xFFFFD700),
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.star,
+                              color: Color(0xFFFFD700),
+                              size: 10,
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -125,31 +130,34 @@ class BalanceCard extends StatelessWidget {
                     '\$ 2,540.000',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 38,
+                      fontSize: 36,
                       fontWeight: FontWeight.w800,
-                      letterSpacing: -1.5,
+                      letterSpacing: -1.0,
                     ),
                   ),
-                  const SizedBox(height: 20),
 
                   // Indicadores  Ingresos|Gastos
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Ingresos
-                      _GlasStat(
-                        icon: Icons.arrow_downward,
-                        color: const Color(0xFF4ECDC4), // Verde Neon
-                        label: 'Ingresos',
-                        amount: '\$ 3.2M',
+                      Expanded(
+                        child: _GlasStat(
+                          icon: Icons.arrow_downward,
+                          color: const Color(0xFF4ECDC4), // Verde Neon
+                          label: 'Ingresos',
+                          amount: '\$ 3.2M',
+                        ),
                       ),
+                      const SizedBox(width: 15),
 
                       // Gastos
-                      _GlasStat(
-                        icon: Icons.arrow_upward,
-                        color: const Color(0xFFFF6B6B), // Rojo Neon
-                        label: 'Gastos',
-                        amount: '\$ 850k',
+                      Expanded(
+                        child: _GlasStat(
+                          icon: Icons.arrow_upward,
+                          color: const Color(0xFFFF6B6B), // Rojo Neon
+                          label: 'Gastos',
+                          amount: '\$ 850k',
+                        ),
                       ),
                     ],
                   ),
@@ -170,12 +178,12 @@ class _DecorationLight extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 150,
-      height: 150,
+      width: 200,
+      height: 200,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color.withValues(alpha: 0.5),
-        boxShadow: [BoxShadow(color: color, blurRadius: 60, spreadRadius: 10)],
+        color: color.withValues(alpha: 0.6),
+        boxShadow: [BoxShadow(color: color, blurRadius: 80, spreadRadius: 20)],
       ),
     );
   }
@@ -196,36 +204,47 @@ class _GlasStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Circulo con icono
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.2),
-            shape: BoxShape.circle,
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Row(
+        children: [
+          // Circulo con icono
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.2),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 18),
           ),
-          child: Icon(icon, color: color, size: 16),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(color: Colors.grey[300], fontSize: 12),
-            ),
-            Text(
-              amount,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  color: Colors.grey[300],
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+              Text(
+                amount,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
