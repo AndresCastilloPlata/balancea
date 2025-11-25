@@ -9,7 +9,7 @@ class BalanceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 220,
+      height: 200,
 
       child: Stack(
         children: [
@@ -17,7 +17,7 @@ class BalanceCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(25),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(25),
@@ -46,66 +46,41 @@ class BalanceCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Encabezado
+                Text(
+                  'Balance Total',
+                  style: TextStyle(color: Colors.grey[300], fontSize: 16),
+                ),
+                const SizedBox(height: 10),
+                // Monto
+                Text(
+                  '\$ 2,540.00',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Fila Ingresos|Gastos
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Balance Total',
-                      style: TextStyle(color: Colors.grey[300], fontSize: 16),
+                    // Indicador de Ingresos
+                    _MiniIndicator(
+                      icon: Icons.arrow_upward_rounded,
+                      color: const Color(0xFF4ECDC4), // Verde Neon
+                      label: 'Ingresos',
+                      amount: '\$ 3.2M',
                     ),
-                    const Icon(Icons.credit_card, color: Colors.white70),
-                  ],
-                ),
 
-                // Saldo
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '\$ 2,540.00',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    SizedBox(height: 5),
-                    Text(
-                      'USD', // Moneda
-                      style: TextStyle(
-                        color: Color(0xFF4ECDC4),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-
-                // Pie de la card
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      '**** **** **** 4284',
-                      style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                    ),
-                    // Círculos decorativos simulando Mastercard/Visa
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.red.withValues(alpha: 0.8),
-                        ),
-                        Transform.translate(
-                          offset: const Offset(-8, 0), // Superponer círculos
-                          child: CircleAvatar(
-                            radius: 10,
-                            backgroundColor: Colors.orange.withValues(
-                              alpha: 0.8,
-                            ),
-                          ),
-                        ),
-                      ],
+                    // Indicador de Gastos
+                    _MiniIndicator(
+                      icon: Icons.arrow_downward_rounded,
+                      color: const Color(0xFFFF6B6B), // Rojo Neon
+                      label: 'Gastos',
+                      amount: '\$ 850k',
                     ),
                   ],
                 ),
@@ -114,6 +89,55 @@ class BalanceCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MiniIndicator extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  final String amount;
+
+  const _MiniIndicator({
+    required this.icon,
+    required this.color,
+    required this.label,
+    required this.amount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        // Circulo con icono
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.2),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: color, size: 18),
+        ),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey[400], fontSize: 12),
+            ),
+            Text(
+              amount,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
