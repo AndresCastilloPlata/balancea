@@ -1,5 +1,6 @@
-import 'package:balancea/presentation/widgets/stats/chart_container.dart';
 import 'package:flutter/material.dart';
+import 'package:balancea/presentation/widgets/stats/chart_container.dart';
+import 'package:balancea/presentation/widgets/stats/stats_categories.dart';
 
 class StatsScreen extends StatelessWidget {
   const StatsScreen({super.key});
@@ -40,15 +41,24 @@ class StatsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             // Grafica
             ChartContainer(),
 
             // Resumen gastos
-            const Text(
-              "Gastos por Categoría",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "Gastos por Categoría",
+                  style: TextStyle(color: Colors.grey, fontSize: 14),
+                ),
+              ),
             ),
+
+            // Lista categorias
+            Expanded(child: StatsCategories()),
           ],
         ),
       ),
