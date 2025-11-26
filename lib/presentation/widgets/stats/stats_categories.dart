@@ -5,14 +5,25 @@ class StatsCategories extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.only(top: 10, bottom: 20),
-      itemCount: _dummyCategories.length,
-
-      itemBuilder: (context, index) {
-        final category = _dummyCategories[index];
-        return _CategoryItem(category: category);
+    return ShaderMask(
+      shaderCallback: (Rect bounds) {
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Colors.white, Colors.white, Colors.transparent],
+          stops: [0.0, 0.9, 1.0],
+        ).createShader(bounds);
       },
+      blendMode: BlendMode.dstIn,
+      child: ListView.builder(
+        padding: const EdgeInsets.only(top: 10, bottom: 20),
+        itemCount: _dummyCategories.length,
+
+        itemBuilder: (context, index) {
+          final category = _dummyCategories[index];
+          return _CategoryItem(category: category);
+        },
+      ),
     );
   }
 }
