@@ -51,9 +51,13 @@ class ChartContainer extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
+                reservedSize: 30,
+                interval: 1,
                 getTitlesWidget: (value, meta) {
-                  const style = TextStyle(color: Colors.grey, fontSize: 10);
+                  if (value % 1 != 0) return Container();
+                  const style = TextStyle(color: Colors.grey, fontSize: 12);
                   String text;
+
                   switch (value.toInt()) {
                     case 0:
                       text = 'LUN';
@@ -70,7 +74,12 @@ class ChartContainer extends StatelessWidget {
                     default:
                       return Container(); // Ocultar otros días para no amontonar
                   }
-                  return Text(text, style: style);
+                  return SideTitleWidget(
+                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                    space: 4,
+                    meta: meta,
+                    child: Text(text, style: style),
+                  );
                 },
               ),
             ),
