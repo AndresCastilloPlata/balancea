@@ -128,54 +128,57 @@ class _CustomSettingsTile extends StatelessWidget {
       child: Material(
         color: const Color(0xFF2A2D3E),
         borderRadius: BorderRadius.circular(15),
-
         clipBehavior: Clip.hardEdge,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: 70),
-          alignment: Alignment.center,
-          child: ListTile(
-            onTap: onTap,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
 
-            // Icono Principal
-            leading: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 70),
+            alignment: Alignment.center,
+
+            child: ListTile(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+
+              // Icono Principal
+              leading: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 22),
               ),
-              child: Icon(icon, color: color, size: 22),
-            ),
 
-            // Textos
-            title: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
+              // Textos
+              title: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            subtitle: subtitle != null
-                ? Text(
-                    subtitle!,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                  )
-                : null,
+              subtitle: subtitle != null
+                  ? Text(
+                      subtitle!,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    )
+                  : null,
 
-            // Elemento final
-            trailing: isLocked
-                ? Icon(Icons.lock, color: Colors.grey[600], size: 20)
-                : showSwitch
-                ? Switch(
-                    value: true, // Dummy value
-                    onChanged: (val) {},
-                    activeTrackColor: const Color(0xFF4ECDC4),
-                  )
-                : const Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.grey,
-                    size: 16,
-                  ),
+              // Elemento final
+              trailing: isLocked
+                  ? Icon(Icons.lock, color: Colors.grey[600], size: 20)
+                  : showSwitch
+                  ? Switch(
+                      value: true, // Dummy value
+                      onChanged: (val) {},
+                      activeTrackColor: const Color(0xFF4ECDC4),
+                    )
+                  : const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.grey,
+                      size: 16,
+                    ),
+            ),
           ),
         ),
       ),
