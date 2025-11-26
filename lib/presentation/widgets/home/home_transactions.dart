@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:balancea/presentation/widgets/shared/transaction_tile.dart';
 
 class HomeTransactions extends StatelessWidget {
   const HomeTransactions({super.key});
@@ -10,67 +11,8 @@ class HomeTransactions extends StatelessWidget {
       itemCount: _dummyTransactions.length,
       itemBuilder: (BuildContext context, int index) {
         final transaction = _dummyTransactions[index];
-        return _TransactionItem(transaction: transaction);
+        return TransactionTile(transaction: transaction);
       },
-    );
-  }
-}
-
-class _TransactionItem extends StatelessWidget {
-  final Map<String, dynamic> transaction;
-
-  const _TransactionItem({required this.transaction});
-
-  @override
-  Widget build(BuildContext context) {
-    final isExpense = transaction['type'] == 'expense';
-    final color = isExpense ? const Color(0xFFFF6B6B) : const Color(0xFF4ECDC4);
-    final icon = isExpense ? Icons.shopping_bag_outlined : Icons.attach_money;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2A2D3E),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-
-        // Izquierda: Icono circular
-        leading: Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color, size: 24),
-        ),
-
-        // Centro: Titulo + fecha
-        title: Text(
-          transaction['title'],
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-        ),
-        subtitle: Text(
-          transaction['date'],
-          style: TextStyle(color: Colors.grey[500], fontSize: 12),
-        ),
-
-        //Derecha: Monto
-        trailing: Text(
-          '${isExpense ? "-" : "+"} \$${transaction['amount']}',
-          style: TextStyle(
-            color: color, // El color del texto coincide con el tipo
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
-        ),
-      ),
     );
   }
 }
