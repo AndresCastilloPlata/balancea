@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -17,13 +18,17 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+    // elimina splash nativo
+    FlutterNativeSplash.remove();
+
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     );
 
+    // Zoom
     _scaleAnimation = Tween<double>(
-      begin: 0.8,
+      begin: 0.5,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
@@ -67,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
                 scale: _scaleAnimation.value,
                 child: Image.asset(
                   'assets/images/logo_neon.png',
-                  width: 250,
+                  width: 350,
                   color: backgroundColor,
                   colorBlendMode: BlendMode.lighten,
                 ),

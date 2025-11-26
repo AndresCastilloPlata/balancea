@@ -81,7 +81,7 @@ flutter:
 flutter_native_splash:
   color: "#191A22" # Nuestro color de fondo oscuro
   # image: assets/images/logo_neon.png # La ruta a nuestro logo
-  android_12:
-    image: assets/images/logo_neon.png # Necesario para Android 12+ que usa un icono circular
-    color: "#191A22"
+  # android_12:
+  #   image: assets/images/logo_neon.png # Necesario para Android 12+ que usa un icono circular
+  #   color: "#191A22"
   fullscreen: true # Oculta la barra de estado para una experiencia inmersiva

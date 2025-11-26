@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:balancea/config/router/app_router.dart';
 
-void main() => runApp(const Balancea());
+void main() {
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  runApp(const Balancea());
+}
 
 class Balancea extends StatelessWidget {
   const Balancea({super.key});
