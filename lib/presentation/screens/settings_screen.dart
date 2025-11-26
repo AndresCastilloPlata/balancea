@@ -123,14 +123,13 @@ class _CustomSettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
         color: const Color(0xFF2A2D3E),
         borderRadius: BorderRadius.circular(15),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
+
+        clipBehavior: Clip.hardEdge,
         child: ListTile(
           onTap: onTap,
           contentPadding: const EdgeInsets.symmetric(
