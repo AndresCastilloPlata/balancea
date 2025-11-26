@@ -10,7 +10,7 @@ class ChartContainer extends StatelessWidget {
     return Container(
       height: 300,
       margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.fromLTRB(10, 20, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
       decoration: BoxDecoration(
         color: const Color(0xFF1F222E),
         borderRadius: BorderRadius.circular(30),
