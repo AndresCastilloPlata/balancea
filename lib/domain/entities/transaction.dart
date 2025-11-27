@@ -16,6 +16,8 @@ class Transaction extends HiveObject {
   final bool isExpense;
   @HiveField(5)
   final String categoryEmoji;
+  @HiveField(6)
+  final String? note;
 
   Transaction({
     required this.id,
@@ -24,5 +26,6 @@ class Transaction extends HiveObject {
     required this.date,
     required this.isExpense,
     required this.categoryEmoji,
+    this.note,
   });
 }
