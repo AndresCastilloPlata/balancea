@@ -1,10 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:balancea/config/router/app_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-void main() {
+void main() async {
+  // Binding
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  // Splash Nativo
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  // Inicializa Hive
+  await Hive.initFlutter();
+
   runApp(const Balancea());
 }
 
