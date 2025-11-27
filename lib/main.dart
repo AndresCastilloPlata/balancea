@@ -1,6 +1,8 @@
+import 'package:balancea/domain/entities/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:balancea/config/router/app_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async {
@@ -11,7 +13,9 @@ void main() async {
   // Inicializa Hive
   await Hive.initFlutter();
 
-  runApp(const Balancea());
+  Hive.registerAdapter(TransactionAdapter());
+
+  runApp(ProviderScope(child: Balancea()));
 }
 
 class Balancea extends StatelessWidget {
