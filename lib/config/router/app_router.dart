@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../presentation/screens/screens.dart';
 import 'package:balancea/presentation/widgets/shared/main_bottom_nav.dart';
@@ -19,7 +20,19 @@ final appRouter = GoRouter(
           routes: [
             GoRoute(
               path: '/home',
-              builder: (context, state) => const HomeScreen(),
+              pageBuilder: (context, state) => CustomTransitionPage(
+                key: state.pageKey,
+                child: const HomeScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                      return FadeTransition(
+                        opacity: CurveTween(
+                          curve: Curves.easeInOut,
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+              ),
             ),
           ],
         ),
