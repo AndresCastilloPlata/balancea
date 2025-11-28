@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
-class HomeQuickActions extends StatelessWidget {
+import 'package:balancea/presentation/providers/transaction_provider.dart';
+import '../../../domain/entities/transaction.dart';
+
+class HomeQuickActions extends ConsumerWidget {
   const HomeQuickActions({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -15,16 +20,30 @@ class HomeQuickActions extends StatelessWidget {
             label: 'Ingreso',
             color: const Color(0xFF4ECDC4),
             onTap: () {
-              print('Ingreso presionado');
+              final newTransaction = Transaction(
+                id: const Uuid().v4(), // ID único aleatorio
+                title: 'Prueba Ingreso',
+                amount: 50000,
+                date: DateTime.now(),
+                isExpense: false, // Es ingreso
+                categoryEmoji: '💰',
+                note: 'Guardado desde Hive!',
+              );
+
+              ref
+                  .read(transactionListProvider.notifier)
+                  .addTransaction(newTransaction);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('¡Ingreso guardado en Hive! 🐝')),
+              );
             },
           ),
           _ActionButton(
             icon: Icons.arrow_upward_rounded,
             label: 'Gasto',
             color: const Color(0xFFFF6B6B),
-            onTap: () {
-              print('Gasto presionado');
-            },
+            onTap: () {},
           ),
           _ActionButton(
             icon: Icons.qr_code_scanner,
