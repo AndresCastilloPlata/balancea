@@ -38,6 +38,7 @@ class HomeTransactions extends ConsumerWidget {
                     "${transaction.date.day}/${transaction.date.month}", // Formato simple
                 'amount': transaction.amount.toString(),
                 'type': transaction.isExpense ? 'expense' : 'income',
+                'emoji': transaction.categoryEmoji,
               },
             );
           },

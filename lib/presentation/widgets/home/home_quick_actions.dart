@@ -1,12 +1,18 @@
+import 'package:balancea/presentation/widgets/shared/add_transaction_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
-
-import 'package:balancea/presentation/providers/transaction_provider.dart';
-import '../../../domain/entities/transaction.dart';
 
 class HomeQuickActions extends ConsumerWidget {
   const HomeQuickActions({super.key});
+
+  void _showAddModal(BuildContext context, {required bool isExpense}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => AddTransactionModal(isExpense: isExpense),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -20,30 +26,16 @@ class HomeQuickActions extends ConsumerWidget {
             label: 'Ingreso',
             color: const Color(0xFF4ECDC4),
             onTap: () {
-              final newTransaction = Transaction(
-                id: const Uuid().v4(), // ID único aleatorio
-                title: 'Prueba Ingreso',
-                amount: 50000,
-                date: DateTime.now(),
-                isExpense: false, // Es ingreso
-                categoryEmoji: '💰',
-                note: 'Guardado desde Hive!',
-              );
-
-              ref
-                  .read(transactionListProvider.notifier)
-                  .addTransaction(newTransaction);
-
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('¡Ingreso guardado en Hive! 🐝')),
-              );
+              _showAddModal(context, isExpense: false);
             },
           ),
           _ActionButton(
             icon: Icons.arrow_upward_rounded,
             label: 'Gasto',
             color: const Color(0xFFFF6B6B),
-            onTap: () {},
+            onTap: () {
+              _showAddModal(context, isExpense: true);
+            },
           ),
           _ActionButton(
             icon: Icons.qr_code_scanner,

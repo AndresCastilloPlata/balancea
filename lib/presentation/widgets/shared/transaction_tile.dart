@@ -9,7 +9,9 @@ class TransactionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final isExpense = transaction['type'] == 'expense';
     final color = isExpense ? const Color(0xFFFF6B6B) : const Color(0xFF4ECDC4);
-    final icon = isExpense ? Icons.shopping_bag_outlined : Icons.attach_money;
+    // final icon = isExpense ? Icons.shopping_bag_outlined : Icons.attach_money;
+
+    final String emoji = transaction['emoji'] ?? (isExpense ? '💸' : '💰');
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -26,7 +28,7 @@ class TransactionTile extends StatelessWidget {
             color: color.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: color, size: 24),
+          child: Text(emoji, style: const TextStyle(fontSize: 24)),
         ),
         title: Text(
           transaction['title'],
