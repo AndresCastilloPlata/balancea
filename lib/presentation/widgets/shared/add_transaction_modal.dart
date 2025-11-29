@@ -55,7 +55,9 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
     // Valida que no este vacio
     if (titleController.text.isEmpty || amountController.text.isEmpty) return;
 
-    final double? amount = double.tryParse(amountController.text);
+    final String sanitizedAmount = amountController.text.replaceAll(',', '.');
+
+    final double? amount = double.tryParse(sanitizedAmount);
     if (amount == null || amount <= 0) return;
 
     // Crea el objeto
@@ -85,207 +87,224 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
     final currentCategories = widget.isExpense
         ? expenseCategories
         : incomeCategories;
-    // Padding para que el teclado no tape el formulario
-    final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      padding: EdgeInsets.fromLTRB(20, 20, 20, 20 + keyboardPadding),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1F222E),
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Barrita decorativa superior
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.grey[700],
-                borderRadius: BorderRadius.circular(2),
-              ),
+    // --- CÁLCULO DE ALTURA EXACTA ---
+
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Color(0xFF1F222E),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+
+        // padding: EdgeInsets.only(bottom: viewInsets * 0.65),
+        child: SingleChildScrollView(
+          reverse: true,
+          physics: const ClampingScrollPhysics(),
+
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(
+              20,
+              20,
+              20,
+              20 + (keyboardHeight * 0.64),
             ),
-          ),
-
-          // Titulo del modal
-          Text(
-            widget.isExpense ? 'Registrar Gasto' : 'Registrar Ingreso',
-            style: TextStyle(
-              color: color,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 20),
-
-          Text(
-            'Categoría',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
-          ),
-          const SizedBox(height: 10),
-          SizedBox(
-            height: 90,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: currentCategories.length + 1,
-              itemBuilder: (BuildContext context, int index) {
-                if (index == currentCategories.length) {
-                  return GestureDetector(
-                    onTap: () {
-                      // TODO: Implementar lógica de límites Free vs Premium
-                      print(
-                        "Agregar nueva categoría (Lógica Premium pendiente)",
-                      );
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 12),
-                      width: 60,
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF2A2D3E),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: Colors.grey.withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          const Text(
-                            "Crear",
-                            style: TextStyle(fontSize: 10, color: Colors.grey),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }
-
-                // item normales
-                final category = currentCategories[index];
-                final emoji = category['icon']!;
-                final name = category['name']!;
-                final isSelected = emoji == selectedEmoji;
-
-                return GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      selectedEmoji = emoji;
-                    });
-                  },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Barrita decorativa superior
+                Center(
                   child: Container(
-                    margin: const EdgeInsets.only(right: 12),
-                    width: 65,
-
-                    child: Column(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? color.withValues(alpha: 0.2)
-                                : const Color(0xFF2A2D3E),
-                            shape: BoxShape.circle,
-                            border: isSelected
-                                ? Border.all(color: color, width: 2)
-                                : null,
-                          ),
-                          child: Text(
-                            emoji,
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-
-                        // Nombre categoria
-                        Text(
-                          name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 10, // Letra pequeña
-                            color: isSelected ? color : Colors.grey[400],
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[700],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                );
-              },
+                ),
+
+                // Titulo del modal
+                Text(
+                  widget.isExpense ? 'Registrar Gasto' : 'Registrar Ingreso',
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                Text(
+                  'Categoría',
+                  style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: 90,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: currentCategories.length + 1,
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index == currentCategories.length) {
+                        return GestureDetector(
+                          onTap: () {
+                            // TODO: Implementar lógica de límites Free vs Premium
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(right: 12),
+                            width: 60,
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2A2D3E),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.grey.withValues(alpha: 0.3),
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(height: 5),
+                                const Text(
+                                  "Crear",
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }
+
+                      // item normales
+                      final category = currentCategories[index];
+                      final isSelected = category['icon'] == selectedEmoji;
+
+                      return GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedEmoji = category['icon']!;
+                          });
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(right: 12),
+                          width: 65,
+
+                          child: Column(
+                            children: [
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? color.withValues(alpha: 0.2)
+                                      : const Color(0xFF2A2D3E),
+                                  shape: BoxShape.circle,
+                                  border: isSelected
+                                      ? Border.all(color: color, width: 2)
+                                      : null,
+                                ),
+                                child: Text(
+                                  category['icon']!,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+
+                              // Nombre categoria
+                              Text(
+                                category['name']!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10, // Letra pequeña
+                                  color: isSelected ? color : Colors.grey[400],
+                                  fontWeight: isSelected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 10),
+
+                // Input 1: Titulo
+                _CustomTextField(
+                  controller: titleController,
+                  label: widget.isExpense
+                      ? 'Título (Ej: Almuerzo)'
+                      : 'Título (Ej: Nómina)',
+                  icon: Icons.title,
+                  color: color,
+                ),
+                const SizedBox(height: 15),
+
+                // Input 2: Monto
+                _CustomTextField(
+                  controller: amountController,
+                  label: 'Monto (Ej: 20000)',
+                  icon: Icons.attach_money,
+                  color: color,
+                  isNumber: true, // Teclado numérico
+                ),
+                const SizedBox(height: 15),
+
+                // Input 3: Nota(opcional)
+                _CustomTextField(
+                  controller: noteController,
+                  label: 'Nota (Opcional)',
+                  icon: Icons.note_alt_outlined,
+                  color: color,
+                ),
+                const SizedBox(height: 30),
+
+                // Boton Guardar
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    onPressed: _saveTransaction,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: color,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    child: const Text(
+                      'Guardar',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 20),
-
-          // Input 1: Titulo
-          _CustomTextField(
-            controller: titleController,
-            label: widget.isExpense
-                ? 'Título (Ej: Almuerzo)'
-                : 'Título (Ej: Nómina)',
-            icon: Icons.title,
-            color: color,
-          ),
-          const SizedBox(height: 15),
-
-          // Input 2: Monto
-          _CustomTextField(
-            controller: amountController,
-            label: 'Monto (Ej: 20000)',
-            icon: Icons.attach_money,
-            color: color,
-            isNumber: true, // Teclado numérico
-          ),
-          const SizedBox(height: 15),
-
-          // Input 3: Nota(opcional)
-          _CustomTextField(
-            controller: noteController,
-            label: 'Nota (Opcional)',
-            icon: Icons.note_alt_outlined,
-            color: color,
-          ),
-          const SizedBox(height: 30),
-
-          // Boton Guardar
-          SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: ElevatedButton(
-              onPressed: _saveTransaction,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: color,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-              ),
-              child: const Text(
-                'Guardar',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -310,7 +329,9 @@ class _CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+      keyboardType: isNumber
+          ? TextInputType.numberWithOptions(decimal: true)
+          : TextInputType.text,
       style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         labelText: label,
