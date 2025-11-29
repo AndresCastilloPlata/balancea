@@ -1,12 +1,31 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:balancea/presentation/providers/transaction_provider.dart';
+import 'package:balancea/config/helpers/currency_helper.dart';
 
-class BalanceCard extends StatelessWidget {
+class BalanceCard extends ConsumerWidget {
   const BalanceCard({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final transactionState = ref.watch(transactionListProvider);
+    final transactions = transactionState.value ?? [];
+
+    double totalIncome = 0;
+    double totalExpense = 0;
+
+    for (var transaction in transactions) {
+      if (transaction.isExpense) {
+        totalExpense += transaction.amount;
+      } else {
+        totalIncome += transaction.amount;
+      }
+    }
+
+    final double totalBalance = totalIncome - totalExpense;
+
     return Container(
       width: double.infinity,
       height: 220,
@@ -71,18 +90,13 @@ class BalanceCard extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Balance Total',
-                            style: TextStyle(
-                              color: Colors.grey[300],
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'Balance Total',
+                        style: TextStyle(
+                          color: Colors.grey[300],
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
 
                       // Cuenta principal
@@ -126,13 +140,13 @@ class BalanceCard extends StatelessWidget {
                   ),
 
                   // Monto
-                  Text(
-                    '\$ 2,540.000',
-                    style: TextStyle(
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: _buildMoneyText(
+                      amount: totalBalance,
+                      baseSize: 36,
                       color: Colors.white,
-                      fontSize: 36,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -1.0,
                     ),
                   ),
 
@@ -145,7 +159,7 @@ class BalanceCard extends StatelessWidget {
                           icon: Icons.arrow_downward,
                           color: const Color(0xFF4ECDC4), // Verde Neon
                           label: 'Ingresos',
-                          amount: '\$ 3.2M',
+                          amount: totalIncome,
                         ),
                       ),
                       const SizedBox(width: 15),
@@ -156,7 +170,7 @@ class BalanceCard extends StatelessWidget {
                           icon: Icons.arrow_upward,
                           color: const Color(0xFFFF6B6B), // Rojo Neon
                           label: 'Gastos',
-                          amount: '\$ 850k',
+                          amount: totalExpense,
                         ),
                       ),
                     ],
@@ -166,6 +180,46 @@ class BalanceCard extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildMoneyText({
+    required double amount,
+    required double baseSize,
+    required Color color,
+  }) {
+    final formatted = CurrencyHelper.format(amount);
+    final parts = formatted.split(',');
+    final integerPart = parts[0];
+    final decimalPart = parts.length > 1 ? ',${parts[1]}' : '';
+
+    return RichText(
+      text: TextSpan(
+        children: [
+          // Parte entera
+          TextSpan(
+            text: integerPart,
+            style: TextStyle(
+              color: color,
+              fontSize: baseSize,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1.0,
+              fontFamily: 'CupertinoSystemText', // O por defecto
+            ),
+          ),
+
+          // Parde Decimal
+          TextSpan(
+            text: decimalPart,
+            style: TextStyle(
+              color: color.withValues(alpha: 0.8), // Un poco más suave
+              fontSize: baseSize * 0.6, // 60% del tamaño original
+              fontWeight: FontWeight.w600,
+              // fontFeatures: [FontFeature.superscripts()], // Opcional si la fuente lo soporta
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -193,7 +247,7 @@ class _GlasStat extends StatelessWidget {
   final IconData icon;
   final Color color;
   final String label;
-  final String amount;
+  final double amount;
 
   const _GlasStat({
     required this.icon,
@@ -204,6 +258,11 @@ class _GlasStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formatted = CurrencyHelper.format(amount);
+    final parts = formatted.split(',');
+    final integerPart = parts[0];
+    final decimalPart = parts.length > 1 ? ',${parts[1]}' : '';
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
@@ -222,26 +281,36 @@ class _GlasStat extends StatelessWidget {
             child: Icon(icon, color: color, size: 18),
           ),
           const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  color: Colors.grey[300],
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: Colors.grey[300],
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              Text(
-                amount,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 15,
+
+                const SizedBox(height: 2),
+
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    CurrencyHelper.format(amount),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14, // Base legible
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),
