@@ -1,6 +1,8 @@
+import 'package:balancea/config/helpers/currency_input_formatter.dart';
 import 'package:balancea/domain/entities/transaction.dart';
 import 'package:balancea/presentation/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
@@ -55,9 +57,11 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
     // Valida que no este vacio
     if (titleController.text.isEmpty || amountController.text.isEmpty) return;
 
-    final String sanitizedAmount = amountController.text.replaceAll(',', '.');
+    // Limpiar monto
+    String cleanAmount = amountController.text.replaceAll('.', '');
+    cleanAmount = cleanAmount.replaceAll(',', '.');
 
-    final double? amount = double.tryParse(sanitizedAmount);
+    final double? amount = double.tryParse(cleanAmount);
     if (amount == null || amount <= 0) return;
 
     // Crea el objeto
@@ -263,10 +267,13 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                 // Input 2: Monto
                 _CustomTextField(
                   controller: amountController,
-                  label: 'Monto (Ej: 20000)',
+                  label: 'Monto (Ej: 20.000)',
                   icon: Icons.attach_money,
                   color: color,
-                  isNumber: true, // Teclado numérico
+                  isNumber: true,
+                  inputFormatters: [
+                    CurrencyInputFormatter(),
+                  ], // Teclado numérico
                 ),
                 const SizedBox(height: 15),
 
@@ -316,6 +323,7 @@ class _CustomTextField extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isNumber;
+  final List<TextInputFormatter>? inputFormatters;
 
   const _CustomTextField({
     required this.controller,
@@ -323,12 +331,14 @@ class _CustomTextField extends StatelessWidget {
     required this.icon,
     required this.color,
     this.isNumber = false,
+    this.inputFormatters,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      inputFormatters: inputFormatters,
       keyboardType: isNumber
           ? TextInputType.numberWithOptions(decimal: true)
           : TextInputType.text,

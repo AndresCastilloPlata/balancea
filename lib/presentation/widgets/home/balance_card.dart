@@ -258,10 +258,10 @@ class _GlasStat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formatted = CurrencyHelper.format(amount);
-    final parts = formatted.split(',');
-    final integerPart = parts[0];
-    final decimalPart = parts.length > 1 ? ',${parts[1]}' : '';
+    //   final formatted = CurrencyHelper.format(amount);
+    // final parts = formatted.split(',');
+    // final integerPart = parts[0];
+    // final decimalPart = parts.length > 1 ? ',${parts[1]}' : '';
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
