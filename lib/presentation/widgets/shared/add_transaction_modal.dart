@@ -9,7 +9,12 @@ import 'package:uuid/uuid.dart';
 
 class AddTransactionModal extends ConsumerStatefulWidget {
   final bool isExpense;
-  const AddTransactionModal({super.key, required this.isExpense});
+  final Transaction? transactionToEdit;
+  const AddTransactionModal({
+    super.key,
+    required this.isExpense,
+    this.transactionToEdit,
+  });
 
   @override
   ConsumerState<AddTransactionModal> createState() =>
@@ -24,6 +29,8 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
   // Categoria
   late String selectedEmoji;
+
+  bool _isLoading = false;
 
   final List<Map<String, String>> expenseCategories = [
     {'icon': '🍔', 'name': 'Comida'},
@@ -40,9 +47,20 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
   @override
   void initState() {
     super.initState();
-    selectedEmoji = widget.isExpense
-        ? expenseCategories.first['icon']!
-        : incomeCategories.first['icon']!;
+
+    if (widget.transactionToEdit != null) {
+      final transaction = widget.transactionToEdit!;
+      titleController.text = transaction.title;
+      amountController.text = transaction.amount.toStringAsFixed(
+        transaction.amount.truncateToDouble() == transaction.amount ? 0 : 2,
+      );
+      noteController.text = transaction.note ?? '';
+      selectedEmoji = transaction.categoryEmoji;
+    } else {
+      selectedEmoji = widget.isExpense
+          ? expenseCategories.first['icon']!
+          : incomeCategories.first['icon']!;
+    }
   }
 
   @override
@@ -53,33 +71,56 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
     super.dispose();
   }
 
-  void _saveTransaction() {
+  Future<void> _saveTransaction() async {
     // Valida que no este vacio
     if (titleController.text.isEmpty || amountController.text.isEmpty) return;
 
-    // Limpiar monto
-    String cleanAmount = amountController.text.replaceAll('.', '');
-    cleanAmount = cleanAmount.replaceAll(',', '.');
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      // Limpiar monto
+      String cleanAmount = amountController.text.replaceAll('.', '');
+      cleanAmount = cleanAmount.replaceAll(',', '.');
 
-    final double? amount = double.tryParse(cleanAmount);
-    if (amount == null || amount <= 0) return;
+      final double? amount = double.tryParse(cleanAmount);
+      if (amount == null || amount <= 0) {
+        throw Exception("Monto inválido");
+      }
 
-    // Crea el objeto
-    final newTransaction = Transaction(
-      id: const Uuid().v4(),
-      title: titleController.text,
-      amount: amount,
-      date: DateTime.now(),
-      isExpense: widget.isExpense,
-      categoryEmoji: selectedEmoji,
-      note: noteController.text,
-    );
+      // Crea el objeto -> Nuevo
+      final transaction = Transaction(
+        id: widget.transactionToEdit?.id ?? const Uuid().v4(),
+        title: titleController.text,
+        amount: amount,
+        date: widget.transactionToEdit?.date ?? DateTime.now(),
+        isExpense: widget.isExpense,
+        categoryEmoji: selectedEmoji,
+        note: noteController.text,
+      );
 
-    // Llama al proider para guardar
-    ref.read(transactionListProvider.notifier).addTransaction(newTransaction);
-
-    // Cerrar modal
-    context.pop();
+      if (widget.transactionToEdit == null) {
+        await ref
+            .read(transactionListProvider.notifier)
+            .addTransaction(transaction);
+      } else {
+        await ref
+            .read(transactionListProvider.notifier)
+            .updateTransaction(transaction);
+      }
+      if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al guardar: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -92,9 +133,11 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
         ? expenseCategories
         : incomeCategories;
 
-    // --- CÁLCULO DE ALTURA EXACTA ---
-
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
+    final String modalTitle = widget.transactionToEdit == null
+        ? (widget.isExpense ? 'Registrar Gasto' : 'Registrar Ingreso')
+        : 'Editar Transacción';
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -135,7 +178,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
                 // Titulo del modal
                 Text(
-                  widget.isExpense ? 'Registrar Gasto' : 'Registrar Ingreso',
+                  modalTitle,
                   style: TextStyle(
                     color: color,
                     fontSize: 20,
@@ -291,21 +334,32 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _saveTransaction,
+                    onPressed: _isLoading ? null : _saveTransaction,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: color,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
                     ),
-                    child: const Text(
-                      'Guardar',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.black,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            widget.transactionToEdit == null
+                                ? 'Guardar'
+                                : 'Actualizar',
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
               ],

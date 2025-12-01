@@ -24,7 +24,7 @@ final transactionRepositoryProvider =
 
 typedef TransactionRepositoryRef
     = AutoDisposeProviderRef<TransactionRepository>;
-String _$transactionListHash() => r'89bde54dd18b9388a497a5d11e5b2c59d937cb44';
+String _$transactionListHash() => r'65ad86f70f35720c5b07a179f8cdf95c4f38cfe7';
 
 /// See also [TransactionList].
 @ProviderFor(TransactionList)

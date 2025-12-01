@@ -22,8 +22,8 @@ class TransactionList extends _$TransactionList {
   Future<void> addTransaction(Transaction transaction) async {
     final repository = ref.read(transactionRepositoryProvider);
     await repository.addTransaction(transaction);
-    ref.invalidateSelf();
-    await future;
+    final previousState = state.value ?? [];
+    state = AsyncData([...previousState, transaction]);
   }
 
   // Editar
@@ -31,8 +31,11 @@ class TransactionList extends _$TransactionList {
     final repository = ref.read(transactionRepositoryProvider);
     await repository.updateTransaction(transaction);
 
-    ref.invalidateSelf(); // Refrescar lista
-    await future;
+    final previousState = state.value ?? [];
+    state = AsyncData([
+      for (final t in previousState)
+        if (t.id == transaction.id) transaction else t,
+    ]);
   }
 
   // Borrar
@@ -40,6 +43,7 @@ class TransactionList extends _$TransactionList {
     final repository = ref.read(transactionRepositoryProvider);
     await repository.deleteTransaction(id);
 
-    ref.invalidateSelf(); // Refrescar lista
+    final previousState = state.value ?? [];
+    state = AsyncData(previousState.where((t) => t.id != id).toList());
   }
 }

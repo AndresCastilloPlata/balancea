@@ -1,3 +1,4 @@
+import 'package:balancea/presentation/widgets/shared/add_transaction_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -31,15 +32,55 @@ class HomeTransactions extends ConsumerWidget {
           itemCount: transactions.length,
           itemBuilder: (BuildContext context, int index) {
             final transaction = transactions.reversed.toList()[index];
-            return TransactionTile(
-              transaction: {
-                'title': transaction.title,
-                'date':
-                    "${transaction.date.day}/${transaction.date.month}", // Formato simple
-                'amount': transaction.amount.toString(),
-                'type': transaction.isExpense ? 'expense' : 'income',
-                'emoji': transaction.categoryEmoji,
+
+            // Funcionalidad de borrar
+            return Dismissible(
+              key: Key(transaction.id),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                margin: const EdgeInsets.only(bottom: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF6B6B).withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Icon(
+                  Icons.delete_outline,
+                  color: Colors.white,
+                  size: 30,
+                ),
+              ),
+              onDismissed: (direction) {
+                ref
+                    .read(transactionListProvider.notifier)
+                    .deleteTransaction(transaction.id);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('${transaction.title} eliminado'),
+                    backgroundColor: const Color(0xFF1F222E),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
               },
+
+              // Tile (visualizacion + edicion)
+              child: TransactionTile(
+                transaction: transaction,
+                onTap: () {
+                  // Modal en modo edicion
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => AddTransactionModal(
+                      isExpense: transaction.isExpense,
+                      transactionToEdit: transaction,
+                    ),
+                  );
+                },
+              ),
             );
           },
         );
