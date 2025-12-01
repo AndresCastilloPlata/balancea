@@ -1,11 +1,14 @@
-import 'package:balancea/config/helpers/currency_input_formatter.dart';
-import 'package:balancea/domain/entities/transaction.dart';
-import 'package:balancea/presentation/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
+
+import 'package:balancea/config/constants/categories_config.dart';
+import 'package:balancea/config/helpers/currency_input_formatter.dart';
+import 'package:balancea/domain/entities/transaction.dart';
+import 'package:balancea/presentation/providers/transaction_provider.dart';
 
 class AddTransactionModal extends ConsumerStatefulWidget {
   final bool isExpense;
@@ -31,18 +34,19 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
   late String selectedEmoji;
 
   bool _isLoading = false;
+  DateTime _selectedDate = DateTime.now();
 
-  final List<Map<String, String>> expenseCategories = [
-    {'icon': '🍔', 'name': 'Comida'},
-    {'icon': '🚌', 'name': 'Transporte'},
-    {'icon': '💡', 'name': 'Servicios'},
-  ];
+  // final List<Map<String, String>> expenseCategories = [
+  //   {'icon': '🍔', 'name': 'Comida'},
+  //   {'icon': '🚌', 'name': 'Transporte'},
+  //   {'icon': '💡', 'name': 'Servicios'},
+  // ];
 
-  final List<Map<String, String>> incomeCategories = [
-    {'icon': '💰', 'name': 'Sueldo'},
-    {'icon': '🏠', 'name': 'Renta'},
-    {'icon': '🎁', 'name': 'Regalo'},
-  ];
+  // final List<Map<String, String>> incomeCategories = [
+  //   {'icon': '💰', 'name': 'Sueldo'},
+  //   {'icon': '🏠', 'name': 'Renta'},
+  //   {'icon': '🎁', 'name': 'Regalo'},
+  // ];
 
   @override
   void initState() {
@@ -56,10 +60,12 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
       );
       noteController.text = transaction.note ?? '';
       selectedEmoji = transaction.categoryEmoji;
+      _selectedDate = transaction.date;
     } else {
       selectedEmoji = widget.isExpense
-          ? expenseCategories.first['icon']!
-          : incomeCategories.first['icon']!;
+          ? CategoriesConfig.defaultExpenses.first
+          : CategoriesConfig.defaultIncomes.first;
+      _selectedDate = DateTime.now();
     }
   }
 
@@ -93,7 +99,8 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
         id: widget.transactionToEdit?.id ?? const Uuid().v4(),
         title: titleController.text,
         amount: amount,
-        date: widget.transactionToEdit?.date ?? DateTime.now(),
+
+        date: _selectedDate,
         isExpense: widget.isExpense,
         categoryEmoji: selectedEmoji,
         note: noteController.text,
@@ -113,13 +120,45 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al guardar: $e'),
+            content: Text('Error: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final Color dialogBackgroundColor = const Color(0xFF1F222E);
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Color(0xFF4ECDC4), // Color de selección
+              onPrimary: Colors.black,
+              surface: Color(0xFF1F222E), // Fondo del calendario
+              onSurface: Colors.white,
+            ),
+            dialogTheme: DialogThemeData(
+              backgroundColor: dialogBackgroundColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null && picked != _selectedDate) {
+      setState(() {
+        _selectedDate = picked;
+      });
     }
   }
 
@@ -130,8 +169,8 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
         : const Color(0xFF4ECDC4);
 
     final currentCategories = widget.isExpense
-        ? expenseCategories
-        : incomeCategories;
+        ? CategoriesConfig.defaultExpenses
+        : CategoriesConfig.defaultIncomes;
 
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
@@ -187,6 +226,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                 ),
                 const SizedBox(height: 20),
 
+                // Categorias
                 Text(
                   'Categoría',
                   style: TextStyle(color: Colors.grey[400], fontSize: 14),
@@ -239,13 +279,14 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                       }
 
                       // item normales
-                      final category = currentCategories[index];
-                      final isSelected = category['icon'] == selectedEmoji;
+                      final emoji = currentCategories[index];
+                      final name = CategoriesConfig.getName(emoji);
+                      final isSelected = emoji == selectedEmoji;
 
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedEmoji = category['icon']!;
+                            selectedEmoji = emoji;
                           });
                         },
                         child: Container(
@@ -267,7 +308,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                                       : null,
                                 ),
                                 child: Text(
-                                  category['icon']!,
+                                  emoji,
                                   style: const TextStyle(fontSize: 24),
                                 ),
                               ),
@@ -275,7 +316,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
                               // Nombre categoria
                               Text(
-                                category['name']!,
+                                name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 style: TextStyle(
@@ -327,6 +368,43 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                   icon: Icons.note_alt_outlined,
                   color: color,
                 ),
+                const SizedBox(height: 30),
+
+                // Fecha
+                GestureDetector(
+                  onTap: _pickDate,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2A2D3E),
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.05),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.calendar_today, color: color, size: 20),
+                        const SizedBox(width: 10),
+                        Text(
+                          // Formato legible: "30 de Noviembre de 2025" o similar
+                          "Fecha: ${DateFormat.yMMMd('es_CO').format(_selectedDate)}",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Spacer(),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.grey,
+                          size: 14,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 30),
 
                 // Boton Guardar

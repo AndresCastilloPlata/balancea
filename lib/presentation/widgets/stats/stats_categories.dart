@@ -1,10 +1,20 @@
+import 'package:balancea/config/helpers/currency_helper.dart';
 import 'package:flutter/material.dart';
 
 class StatsCategories extends StatelessWidget {
-  const StatsCategories({super.key});
+  final List<CategoryStat> categories;
+  const StatsCategories({super.key, required this.categories});
 
   @override
   Widget build(BuildContext context) {
+    if (categories.isEmpty) {
+      return const Center(
+        child: Text(
+          "No hay gastos registrados",
+          style: TextStyle(color: Colors.white54),
+        ),
+      );
+    }
     return ShaderMask(
       shaderCallback: (Rect bounds) {
         return const LinearGradient(
@@ -17,10 +27,10 @@ class StatsCategories extends StatelessWidget {
       blendMode: BlendMode.dstIn,
       child: ListView.builder(
         padding: const EdgeInsets.only(top: 10, bottom: 20),
-        itemCount: _dummyCategories.length,
+        itemCount: categories.length,
 
         itemBuilder: (context, index) {
-          final category = _dummyCategories[index];
+          final category = categories[index];
           return _CategoryItem(category: category);
         },
       ),
@@ -29,14 +39,11 @@ class StatsCategories extends StatelessWidget {
 }
 
 class _CategoryItem extends StatelessWidget {
-  final Map<String, dynamic> category;
+  final CategoryStat category;
   const _CategoryItem({required this.category});
 
   @override
   Widget build(BuildContext context) {
-    final double percentage = category['percentage'];
-    final Color color = category['color'];
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
@@ -49,19 +56,24 @@ class _CategoryItem extends StatelessWidget {
                 children: [
                   // Punto Indicador
                   Container(
-                    width: 12,
-                    height: 12,
+                    width: 36,
+                    height: 36,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
-                      color: color,
+                      color: category.color.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(color: color.withValues(alpha: 0.5)),
-                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        category.emoji,
+                        style: const TextStyle(fontSize: 18, height: 1.2),
+                        // textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Text(
-                    category['name'],
+                    category.name,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -71,7 +83,7 @@ class _CategoryItem extends StatelessWidget {
                 ],
               ),
               Text(
-                '\$${category['amount']}',
+                CurrencyHelper.format(category.amount),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,
@@ -86,9 +98,9 @@ class _CategoryItem extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: LinearProgressIndicator(
-              value: percentage,
+              value: category.percentage,
               backgroundColor: const Color(0xFF2A2D3E),
-              color: color,
+              color: category.color,
               minHeight: 8,
             ),
           ),
@@ -98,7 +110,7 @@ class _CategoryItem extends StatelessWidget {
           Align(
             alignment: Alignment.centerRight,
             child: Text(
-              '${(percentage * 100).toInt()}%',
+              '${(category.percentage * 100).toInt()}%',
               style: TextStyle(color: Colors.grey[500], fontSize: 10),
             ),
           ),
@@ -108,30 +120,19 @@ class _CategoryItem extends StatelessWidget {
   }
 }
 
-// --- DATOS FALSOS ---
-final List<Map<String, dynamic>> _dummyCategories = [
-  {
-    'name': 'Comida y Bebida',
-    'amount': '850.000',
-    'percentage': 0.45, // 45%
-    'color': const Color(0xFF4ECDC4), // Turquesa
-  },
-  {
-    'name': 'Transporte',
-    'amount': '320.000',
-    'percentage': 0.20, // 20%
-    'color': const Color(0xFF7C4DFF), // Violeta
-  },
-  {
-    'name': 'Servicios',
-    'amount': '150.000',
-    'percentage': 0.10, // 10%
-    'color': const Color(0xFFFF6B6B), // Rojo
-  },
-  {
-    'name': 'Entretenimiento',
-    'amount': '200.000',
-    'percentage': 0.15, // 15%
-    'color': Colors.orangeAccent,
-  },
-];
+// Modelo simple para pasar datos limpios a la UI
+class CategoryStat {
+  final String emoji;
+  final String name;
+  final double amount;
+  final double percentage;
+  final Color color;
+
+  CategoryStat({
+    required this.emoji,
+    required this.name,
+    required this.amount,
+    required this.percentage,
+    required this.color,
+  });
+}

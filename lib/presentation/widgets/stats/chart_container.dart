@@ -2,15 +2,28 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class ChartContainer extends StatelessWidget {
-  const ChartContainer({super.key});
+  final List<FlSpot> spots;
+  final double maxY;
+  const ChartContainer({super.key, required this.spots, required this.maxY});
 
   @override
   Widget build(BuildContext context) {
+    if (spots.isEmpty) {
+      return const SizedBox(
+        height: 300,
+        child: Center(
+          child: Text(
+            "Sin datos recientes",
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+      );
+    }
     // Base
     return Container(
       height: 300,
       margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 10),
+      padding: const EdgeInsets.fromLTRB(20, 25, 20, 10),
       decoration: BoxDecoration(
         color: const Color(0xFF1F222E),
         borderRadius: BorderRadius.circular(30),
@@ -26,6 +39,8 @@ class ChartContainer extends StatelessWidget {
       // Grafica
       child: LineChart(
         LineChartData(
+          maxY: maxY * 1.1, // Un 10% más de aire arriba
+          minY: 0,
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,
@@ -54,32 +69,24 @@ class ChartContainer extends StatelessWidget {
                 reservedSize: 30,
                 interval: 1,
                 getTitlesWidget: (value, meta) {
-                  if (value % 1 != 0) return Container();
-                  const style = TextStyle(color: Colors.grey, fontSize: 12);
-                  String text;
+                  const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+                  final index = value.toInt();
 
-                  switch (value.toInt()) {
-                    case 0:
-                      text = 'LUN';
-                      break;
-                    case 2:
-                      text = 'MIE';
-                      break;
-                    case 4:
-                      text = 'VIE';
-                      break;
-                    case 6:
-                      text = 'DOM';
-                      break;
-                    default:
-                      return Container(); // Ocultar otros días para no amontonar
+                  if (index >= 0 && index < days.length) {
+                    return SideTitleWidget(
+                      fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                      space: 4,
+                      meta: meta,
+                      child: Text(
+                        days[index],
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                    );
                   }
-                  return SideTitleWidget(
-                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                    space: 4,
-                    meta: meta,
-                    child: Text(text, style: style),
-                  );
+                  return const SizedBox();
                 },
               ),
             ),
@@ -91,17 +98,9 @@ class ChartContainer extends StatelessWidget {
           // Datos
           lineBarsData: [
             LineChartBarData(
-              spots: const [
-                //Dia|Monto
-                FlSpot(0, 3), // Lunes
-                FlSpot(1, 1), // Martes (Bajó)
-                FlSpot(2, 4), // Miercoles (Subió)
-                FlSpot(3, 2),
-                FlSpot(4, 5), // Viernes (Pico)
-                FlSpot(5, 3),
-                FlSpot(6, 4),
-              ],
+              spots: spots,
               isCurved: true,
+              preventCurveOverShooting: true,
               color: const Color(0xFF4ECDC4),
               barWidth: 3,
               isStrokeCapRound: true,
@@ -123,6 +122,8 @@ class ChartContainer extends StatelessWidget {
               ),
             ),
           ],
+          minX: -0.2,
+          maxX: 6.2,
         ),
       ),
     );
