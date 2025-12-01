@@ -13,14 +13,24 @@ class TransactionsScreen extends ConsumerStatefulWidget {
 }
 
 class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
+  final TextEditingController _searchController = TextEditingController();
   String searchQuery = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final transactionState = ref.watch(transactionListProvider);
 
+    final bottomPadding = MediaQuery.of(context).viewInsets.bottom;
+
     return Scaffold(
       backgroundColor: const Color(0xFF191A22),
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
         child: Column(
           children: [
@@ -42,6 +52,7 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
 
                   // Input Busqueda
                   TextField(
+                    controller: _searchController,
                     style: const TextStyle(color: Colors.white),
                     onChanged: (value) {
                       setState(() {
@@ -54,6 +65,18 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                       hintText: 'Buscar transacción...',
                       hintStyle: TextStyle(color: Colors.grey[600]),
                       prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                      suffixIcon: searchQuery.isNotEmpty
+                          ? IconButton(
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() {
+                                  searchQuery = '';
+                                });
+                                FocusScope.of(context).unfocus();
+                              },
+                              icon: Icon(Icons.close, color: Colors.grey),
+                            )
+                          : null,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
                         borderSide: BorderSide.none,
@@ -89,7 +112,13 @@ class _TransactionsScreenState extends ConsumerState<TransactionsScreen> {
                   }
 
                   return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    // padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: EdgeInsets.only(
+                      top: 20,
+                      left: 20,
+                      right: 20,
+                      bottom: 20 + bottomPadding,
+                    ),
                     itemCount: sortedList.length,
                     itemBuilder: (context, index) {
                       final transaction = sortedList[index];
