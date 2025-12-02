@@ -27,17 +27,15 @@ class AppSettings {
 }
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
-  SettingsNotifier() : super(AppSettings()) {
-    _loadSettings();
-  }
-
   static const String _boxName = 'settingsBox';
 
-  Future<void> _loadSettings() async {
-    final box = await Hive.openBox(_boxName);
+  SettingsNotifier() : super(_getInitialState());
+
+  static AppSettings _getInitialState() {
+    final box = Hive.box(_boxName);
 
     // Valores primera vez por defecto
-    state = AppSettings(
+    return AppSettings(
       isDarkTheme: box.get('isDarkTheme', defaultValue: true),
       isBiometricEnabled: box.get('isBiometricEnabled', defaultValue: false),
       areNotificationsEnabled: box.get(

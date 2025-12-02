@@ -1,15 +1,17 @@
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -39,13 +41,22 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller.forward();
 
-    _navigateToHome();
+    _checkBiometricsAndNavigate();
   }
 
-  Future<void> _navigateToHome() async {
+  Future<void> _checkBiometricsAndNavigate() async {
     await Future.delayed(const Duration(seconds: 3));
 
-    if (mounted) {
+    if (!mounted) {
+      return;
+    }
+
+    final settings = ref.read(settingsProvider);
+
+    // Desicion:
+    if (settings.isBiometricEnabled) {
+      context.go('/auth');
+    } else {
       context.go('/home');
     }
   }
