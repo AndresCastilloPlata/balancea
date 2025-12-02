@@ -39,6 +39,7 @@ class ChartContainer extends StatelessWidget {
       height: 300,
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.fromLTRB(20, 25, 20, 10),
+      clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
         color: const Color(0xFF1F222E),
         borderRadius: BorderRadius.circular(30),
