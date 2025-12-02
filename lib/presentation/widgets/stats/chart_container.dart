@@ -7,12 +7,18 @@ class ChartContainer extends StatelessWidget {
   final double maxY;
   final double maxX;
   final String Function(double) getBottomTitle;
+
+  final double bottomTitleAngle;
+  final double bottomReservedSize;
+
   const ChartContainer({
     super.key,
     required this.spots,
     required this.maxY,
     required this.maxX,
     required this.getBottomTitle,
+    this.bottomTitleAngle = 0.0,
+    this.bottomReservedSize = 30.0,
   });
 
   @override
@@ -96,7 +102,7 @@ class ChartContainer extends StatelessWidget {
             bottomTitles: AxisTitles(
               sideTitles: SideTitles(
                 showTitles: true,
-                reservedSize: 30,
+                reservedSize: bottomReservedSize,
                 interval: 1,
                 getTitlesWidget: (value, meta) {
                   final text = getBottomTitle(value);
@@ -106,6 +112,7 @@ class ChartContainer extends StatelessWidget {
                     fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
                     space: 4,
                     meta: meta,
+                    angle: bottomTitleAngle,
                     child: Text(
                       text,
                       style: const TextStyle(color: Colors.grey, fontSize: 10),
