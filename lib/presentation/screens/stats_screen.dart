@@ -1,3 +1,5 @@
+import 'package:balancea/config/constants/categories_config.dart';
+import 'package:balancea/domain/entities/transaction.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,8 +8,15 @@ import 'package:balancea/presentation/providers/transaction_provider.dart';
 import 'package:balancea/presentation/widgets/stats/chart_container.dart';
 import 'package:balancea/presentation/widgets/stats/stats_categories.dart';
 
-class StatsScreen extends ConsumerWidget {
+class StatsScreen extends ConsumerStatefulWidget {
   const StatsScreen({super.key});
+
+  @override
+  ConsumerState<StatsScreen> createState() => _StatsScreenState();
+}
+
+class _StatsScreenState extends ConsumerState<StatsScreen> {
+  int _selectedFilterIndex = 0;
 
   final List<Color> _colors = const [
     Color(0xFF4ECDC4),
@@ -18,17 +27,137 @@ class StatsScreen extends ConsumerWidget {
     Color(0xFF06D6A0),
   ];
 
-  final Map<String, String> _names = const {
-    '🍔': 'Comida',
-    '🚌': 'Transporte',
-    '💡': 'Servicios',
-    '💰': 'Sueldo',
-    '🏠': 'Renta',
-    '🎁': 'Regalo',
-  };
+  // final Map<String, String> _names = const {
+  //   '🍔': 'Comida',
+  //   '🚌': 'Transporte',
+  //   '💡': 'Servicios',
+  //   '💰': 'Sueldo',
+  //   '🏠': 'Renta',
+  //   '🎁': 'Regalo',
+  // };
+
+  // Filtrar transacciones
+  List<Transaction> _filterTransactionsByDate(
+    List<Transaction> allTransactions,
+  ) {
+    final now = DateTime.now();
+    final expenses = allTransactions.where((t) => t.isExpense).toList();
+
+    return expenses.where((t) {
+      if (_selectedFilterIndex == 0) {
+        // Semana
+        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+
+        final start = DateTime(
+          startOfWeek.year,
+          startOfWeek.month,
+          startOfWeek.day,
+        );
+
+        return t.date.isAfter(start) || t.date.isAtSameMomentAs(start);
+      } else if (_selectedFilterIndex == 1) {
+        // Mes
+        return t.date.month == now.month && t.date.year == now.year;
+      } else {
+        // Año
+        return t.date.year == now.year;
+      }
+    }).toList();
+  }
+
+  // Datos para la grafica (polimorfismo de ejes)
+  _ChartData _prepareChartData(List<Transaction> transactions) {
+    final Map<int, double> map = {};
+    double maxAmount = 0;
+    double maxX = 6; // semana(0-6)
+
+    if (_selectedFilterIndex == 0) {
+      // Semana
+      maxX = 6;
+
+      for (int i = 0; i <= 6; i++) {
+        map[i] = 0;
+      }
+
+      for (var t in transactions) {
+        final index = t.date.weekday - 1;
+        map[index] = (map[index] ?? 0) + t.amount;
+      }
+    } else if (_selectedFilterIndex == 1) {
+      // Mes
+      final now = DateTime.now();
+      final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+      maxX = (daysInMonth - 1).toDouble();
+
+      for (int i = 0; i < daysInMonth; i++) {
+        map[i] = 0;
+      }
+
+      for (var t in transactions) {
+        final index = t.date.day - 1;
+        map[index] = (map[index] ?? 0) + t.amount;
+      }
+    } else {
+      // Año
+      maxX = 11;
+      for (int i = 0; i <= 11; i++) map[i] = 0;
+
+      for (var t in transactions) {
+        final index = t.date.month - 1;
+        map[index] = (map[index] ?? 0) + t.amount;
+      }
+    }
+
+    // Encontrar el valor en Y mas alto para escalar grafica
+    map.forEach((key, value) {
+      if (value > maxAmount) maxAmount = value;
+    });
+
+    // Convertir mapa a FlSpots
+    final List<FlSpot> spots =
+        map.entries.map((e) => FlSpot(e.key.toDouble(), e.value)).toList()
+          ..sort((a, b) => a.x.compareTo(b.x)); // Ordenar por eje X
+
+    return _ChartData(spots: spots, maxY: maxAmount, maxX: maxX);
+  }
+
+  // Etiquetas eje X
+  String _getBottomTitle(double value) {
+    final index = value.toInt();
+
+    if (_selectedFilterIndex == 0) {
+      // SEMANA: L, M, M...
+      const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+      if (index >= 0 && index < days.length) return days[index];
+    } else if (_selectedFilterIndex == 1) {
+      // MES: 1, 5, 10, 15... (Para no saturar)
+      // Mostramos solo múltiplos de 5 y el 1
+      final day = index + 1;
+      if (day == 1 || day % 5 == 0) return day.toString();
+      return ''; // Ocultar otros días para limpieza visual
+    } else {
+      // AÑO: E, F, M...
+      const months = [
+        'E',
+        'F',
+        'M',
+        'A',
+        'M',
+        'J',
+        'J',
+        'A',
+        'S',
+        'O',
+        'N',
+        'D',
+      ];
+      if (index >= 0 && index < months.length) return months[index];
+    }
+    return '';
+  }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final transactionState = ref.watch(transactionListProvider);
 
     return Scaffold(
@@ -37,15 +166,18 @@ class StatsScreen extends ConsumerWidget {
         child: transactionState.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, stack) => Center(child: Text('Error: $err')),
-          data: (transactions) {
+          data: (allTransactions) {
             // Filtrar gastos
-            final expenses = transactions.where((t) => t.isExpense).toList();
+            final filteredExpenses = _filterTransactionsByDate(allTransactions);
+
+            // Datos Grafica
+            final chartData = _prepareChartData(filteredExpenses);
 
             // Datos para categoria
             final Map<String, double> totalsByEmoji = {};
             double totalExpense = 0;
 
-            for (var t in expenses) {
+            for (var t in filteredExpenses) {
               totalsByEmoji[t.categoryEmoji] =
                   (totalsByEmoji[t.categoryEmoji] ?? 0) + t.amount;
               totalExpense += t.amount;
@@ -55,7 +187,7 @@ class StatsScreen extends ConsumerWidget {
             int colorIndex = 0;
 
             totalsByEmoji.forEach((emoji, amount) {
-              final name = _names[emoji] ?? 'Otro';
+              final name = CategoriesConfig.getName(emoji);
 
               categoryStats.add(
                 CategoryStat(
@@ -72,31 +204,31 @@ class StatsScreen extends ConsumerWidget {
             categoryStats.sort((a, b) => b.amount.compareTo(a.amount));
 
             // Datos para la grafica
-            final Map<int, double> weeklyMap = {
-              0: 0,
-              1: 0,
-              2: 0,
-              3: 0,
-              4: 0,
-              5: 0,
-              6: 0,
-            };
-            double maxDayAmount = 0;
+            // final Map<int, double> weeklyMap = {
+            //   0: 0,
+            //   1: 0,
+            //   2: 0,
+            //   3: 0,
+            //   4: 0,
+            //   5: 0,
+            //   6: 0,
+            // };
+            // double maxDayAmount = 0;
 
-            for (var t in expenses) {
-              // weekday devuelve 1 (Lunes) a 7 (Domingo). Restamos 1 para índice 0-6
-              final dayIndex = t.date.weekday - 1;
-              weeklyMap[dayIndex] = (weeklyMap[dayIndex] ?? 0) + t.amount;
+            // for (var t in filteredExpenses) {
+            //   // weekday devuelve 1 (Lunes) a 7 (Domingo). Restamos 1 para índice 0-6
+            //   final dayIndex = t.date.weekday - 1;
+            //   weeklyMap[dayIndex] = (weeklyMap[dayIndex] ?? 0) + t.amount;
 
-              if (weeklyMap[dayIndex]! > maxDayAmount) {
-                maxDayAmount = weeklyMap[dayIndex]!;
-              }
-            }
+            //   if (weeklyMap[dayIndex]! > maxDayAmount) {
+            //     maxDayAmount = weeklyMap[dayIndex]!;
+            //   }
+            // }
 
-            final List<FlSpot> spots = [];
-            for (int i = 0; i < 7; i++) {
-              spots.add(FlSpot(i.toDouble(), weeklyMap[i]!));
-            }
+            // final List<FlSpot> spots = [];
+            // for (int i = 0; i < 7; i++) {
+            //   spots.add(FlSpot(i.toDouble(), weeklyMap[i]!));
+            // }
 
             return Column(
               children: [
@@ -123,28 +255,46 @@ class StatsScreen extends ConsumerWidget {
                   ),
                   child: Row(
                     children: [
-                      _TimeFilterTab(text: 'Semana', isSelected: true),
-                      _TimeFilterTab(text: 'Mes', isSelected: false),
-                      _TimeFilterTab(text: 'Año', isSelected: false),
+                      _TimeFilterTab(
+                        text: 'Semana',
+                        isSelected: _selectedFilterIndex == 0,
+                        onTap: () => setState(() => _selectedFilterIndex = 0),
+                      ),
+                      _TimeFilterTab(
+                        text: 'Mes',
+                        isSelected: _selectedFilterIndex == 1,
+                        onTap: () => setState(() => _selectedFilterIndex = 1),
+                      ),
+                      _TimeFilterTab(
+                        text: 'Año',
+                        isSelected: _selectedFilterIndex == 2,
+                        onTap: () => setState(() => _selectedFilterIndex = 2),
+                      ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 10),
                 // Grafica
                 ChartContainer(
-                  spots: spots,
-                  maxY: maxDayAmount > 0
-                      ? maxDayAmount
+                  spots: chartData.spots,
+                  maxY: chartData.maxY > 0
+                      ? chartData.maxY
                       : 100, // Evitar división por 0
+                  maxX: chartData.maxX,
+                  getBottomTitle: _getBottomTitle,
                 ),
 
                 // Resumen gastos
-                const Padding(
+                Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Gastos por Categoría",
+                      _selectedFilterIndex == 0
+                          ? "Gastos esta semana"
+                          : _selectedFilterIndex == 1
+                          ? "Gastos este mes"
+                          : "Gastos este año",
                       style: TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                   ),
@@ -161,28 +311,45 @@ class StatsScreen extends ConsumerWidget {
   }
 }
 
+class _ChartData {
+  final List<FlSpot> spots;
+  final double maxY;
+  final double maxX;
+
+  _ChartData({required this.spots, required this.maxY, required this.maxX});
+}
+
 class _TimeFilterTab extends StatelessWidget {
   final String text;
   final bool isSelected;
+  final VoidCallback onTap;
 
-  const _TimeFilterTab({required this.text, required this.isSelected});
+  const _TimeFilterTab({
+    required this.text,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4ECDC4) : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: isSelected ? Colors.black : Colors.grey,
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF4ECDC4) : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: isSelected ? Colors.black : Colors.grey,
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
           ),
         ),
       ),

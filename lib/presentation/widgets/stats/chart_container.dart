@@ -4,7 +4,15 @@ import 'package:flutter/material.dart';
 class ChartContainer extends StatelessWidget {
   final List<FlSpot> spots;
   final double maxY;
-  const ChartContainer({super.key, required this.spots, required this.maxY});
+  final double maxX;
+  final String Function(double) getBottomTitle;
+  const ChartContainer({
+    super.key,
+    required this.spots,
+    required this.maxY,
+    required this.maxX,
+    required this.getBottomTitle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -69,24 +77,18 @@ class ChartContainer extends StatelessWidget {
                 reservedSize: 30,
                 interval: 1,
                 getTitlesWidget: (value, meta) {
-                  const days = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
-                  final index = value.toInt();
+                  final text = getBottomTitle(value);
 
-                  if (index >= 0 && index < days.length) {
-                    return SideTitleWidget(
-                      fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
-                      space: 4,
-                      meta: meta,
-                      child: Text(
-                        days[index],
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                    );
-                  }
-                  return const SizedBox();
+                  if (text.isEmpty) return const SizedBox();
+                  return SideTitleWidget(
+                    fitInside: SideTitleFitInsideData.fromTitleMeta(meta),
+                    space: 4,
+                    meta: meta,
+                    child: Text(
+                      text,
+                      style: const TextStyle(color: Colors.grey, fontSize: 10),
+                    ),
+                  );
                 },
               ),
             ),
@@ -122,8 +124,8 @@ class ChartContainer extends StatelessWidget {
               ),
             ),
           ],
-          minX: -0.2,
-          maxX: 6.2,
+          minX: 0,
+          maxX: maxX,
         ),
       ),
     );
