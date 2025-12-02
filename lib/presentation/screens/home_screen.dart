@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../widgets/home/home_widgets.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -41,7 +42,7 @@ class HomeScreen extends ConsumerWidget {
                   // Boton "ver todo"
                   GestureDetector(
                     onTap: () {
-                      print('ver todos');
+                      context.go('/transactions');
                     },
                     child: const Text(
                       'Ver todo',

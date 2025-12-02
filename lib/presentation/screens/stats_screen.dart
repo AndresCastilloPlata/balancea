@@ -91,7 +91,9 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     } else {
       // Año
       maxX = 11;
-      for (int i = 0; i <= 11; i++) map[i] = 0;
+      for (int i = 0; i <= 11; i++) {
+        map[i] = 0;
+      }
 
       for (var t in transactions) {
         final index = t.date.month - 1;

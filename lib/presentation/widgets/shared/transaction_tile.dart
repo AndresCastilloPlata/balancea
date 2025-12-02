@@ -13,9 +13,12 @@ class TransactionTile extends StatelessWidget {
     final color = transaction.isExpense
         ? const Color(0xFFFF6B6B)
         : const Color(0xFF4ECDC4);
-    // final icon = isExpense ? Icons.shopping_bag_outlined : Icons.attach_money;
 
     final String emoji = transaction.categoryEmoji;
+
+    // Valida si hay nota
+    final bool hasNote =
+        transaction.note != null && transaction.note!.isNotEmpty;
 
     return GestureDetector(
       onTap: onTap,
@@ -47,9 +50,31 @@ class TransactionTile extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          subtitle: Text(
-            '${transaction.date.day}/${transaction.date.month}/${transaction.date.year}',
-            style: TextStyle(color: Colors.grey[500], fontSize: 12),
+          subtitle: Row(
+            children: [
+              Text(
+                '${transaction.date.day}/${transaction.date.month}/${transaction.date.year}',
+                style: TextStyle(color: Colors.grey[500], fontSize: 12),
+              ),
+              // Si hay nota
+              if (hasNote) ...[
+                const SizedBox(width: 6),
+                Container(
+                  width: 4,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[600],
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Icon(
+                  Icons.description_outlined,
+                  size: 14,
+                  color: Colors.grey[500],
+                ),
+              ],
+            ],
           ),
           trailing: Text(
             '${transaction.isExpense ? "-" : "+"} ${CurrencyHelper.format(transaction.amount)}',
