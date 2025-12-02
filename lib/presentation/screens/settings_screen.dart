@@ -1,10 +1,15 @@
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final settingsNotifier = ref.read(settingsProvider.notifier);
+
     return Scaffold(
       backgroundColor: const Color(0xFF191A22),
       appBar: AppBar(
@@ -42,9 +47,18 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.notifications_outlined,
             color: Colors.orangeAccent,
             title: 'Notificaciones',
-            subtitle: 'Activas (9:00 AM)',
-            onTap: () {},
+            subtitle: settings.areNotificationsEnabled
+                ? 'Activas'
+                : 'Desactivadas',
+            onTap: () {
+              settingsNotifier.toggleNotifications(
+                !settings.areNotificationsEnabled,
+              );
+            },
             showSwitch: true, // Interruptor
+            switchValue: settings.areNotificationsEnabled,
+            onSwitchChanged: (value) =>
+                settingsNotifier.toggleNotifications(value),
           ),
 
           const SizedBox(height: 25),
@@ -57,8 +71,12 @@ class SettingsScreen extends StatelessWidget {
             color: const Color(0xFF7C4DFF), // Violeta
             title: 'Biometría',
             subtitle: 'Usar FaceID / Huella',
-            onTap: () {},
+            onTap: () {
+              settingsNotifier.toggleBiometric(!settings.isBiometricEnabled);
+            },
             showSwitch: true,
+            switchValue: settings.isBiometricEnabled,
+            onSwitchChanged: (value) => settingsNotifier.toggleBiometric(value),
           ),
           _CustomSettingsTile(
             icon: Icons.lock_outline,
@@ -111,6 +129,9 @@ class _CustomSettingsTile extends StatelessWidget {
   final bool isLocked;
   final VoidCallback onTap;
 
+  final bool switchValue;
+  final ValueChanged<bool>? onSwitchChanged;
+
   const _CustomSettingsTile({
     required this.icon,
     required this.color,
@@ -119,6 +140,8 @@ class _CustomSettingsTile extends StatelessWidget {
     this.showSwitch = false,
     this.isLocked = false,
     required this.onTap,
+    this.switchValue = false,
+    this.onSwitchChanged,
   });
 
   @override
@@ -169,8 +192,8 @@ class _CustomSettingsTile extends StatelessWidget {
                   ? Icon(Icons.lock, color: Colors.grey[600], size: 20)
                   : showSwitch
                   ? Switch(
-                      value: true, // Dummy value
-                      onChanged: (val) {},
+                      value: switchValue,
+                      onChanged: onSwitchChanged,
                       activeTrackColor: const Color(0xFF4ECDC4),
                     )
                   : const Icon(
