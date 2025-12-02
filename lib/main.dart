@@ -1,3 +1,4 @@
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -24,18 +25,21 @@ void main() async {
   runApp(ProviderScope(child: Balancea()));
 }
 
-class Balancea extends StatelessWidget {
+class Balancea extends ConsumerWidget {
   const Balancea({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(appRouterProvider);
+
     return MaterialApp.router(
-      routerConfig: appRouter,
+      routerConfig: router,
       title: 'Balancea',
       debugShowCheckedModeBanner: false,
       theme: ThemeData.dark(
         useMaterial3: true,
       ).copyWith(scaffoldBackgroundColor: const Color(0xFF191A22)),
+      builder: (context, child) => child!,
     );
   }
 }

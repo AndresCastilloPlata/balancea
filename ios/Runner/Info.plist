@@ -49,5 +49,7 @@
 		<true/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<false/>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Necesitamos verificar tu identidad para proteger tus datos financieros.</string>
 	</dict>
 </plist>
