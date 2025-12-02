@@ -130,7 +130,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       if (day == 1 || day == totalDays) {
         return day.toString();
       }
-      if (day % 5 == 0 && (totalDays - day) > 1) {
+      if (day % 5 == 0 && (totalDays - day) >= 2) {
         return day.toString();
       }
       return ''; // Ocultar otros días para limpieza visual
@@ -254,8 +254,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                       : 100, // Evitar división por 0
                   maxX: chartData.maxX,
                   getBottomTitle: _getBottomTitle,
-                  bottomTitleAngle: _selectedFilterIndex == 2 ? -0.6 : 0.0,
-                  bottomReservedSize: _selectedFilterIndex == 2 ? 40.0 : 30.0,
+                  bottomTitleAngle: _selectedFilterIndex == 2 ? -0.9 : 0.0,
+                  bottomReservedSize: _selectedFilterIndex == 2 ? 35.0 : 30.0,
                 ),
 
                 // Resumen gastos
