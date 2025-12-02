@@ -1,3 +1,4 @@
+import 'package:balancea/config/helpers/currency_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -49,6 +50,27 @@ class ChartContainer extends StatelessWidget {
         LineChartData(
           maxY: maxY * 1.1, // Un 10% más de aire arriba
           minY: 0,
+          lineTouchData: LineTouchData(
+            touchTooltipData: LineTouchTooltipData(
+              getTooltipColor: (touchedSpot) => Colors.black,
+              tooltipBorderRadius: BorderRadius.circular(8),
+              tooltipPadding: const EdgeInsets.all(8),
+              fitInsideHorizontally: true,
+              fitInsideVertically: true,
+              getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                return touchedSpots.map((barSpot) {
+                  return LineTooltipItem(
+                    CurrencyHelper.format(barSpot.y),
+                    const TextStyle(
+                      color: Color(0xFF4ECDC4),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  );
+                }).toList();
+              },
+            ),
+          ),
           gridData: FlGridData(
             show: true,
             drawVerticalLine: false,

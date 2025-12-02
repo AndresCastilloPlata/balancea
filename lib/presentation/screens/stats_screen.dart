@@ -27,15 +27,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     Color(0xFF06D6A0),
   ];
 
-  // final Map<String, String> _names = const {
-  //   '🍔': 'Comida',
-  //   '🚌': 'Transporte',
-  //   '💡': 'Servicios',
-  //   '💰': 'Sueldo',
-  //   '🏠': 'Renta',
-  //   '🎁': 'Regalo',
-  // };
-
   // Filtrar transacciones
   List<Transaction> _filterTransactionsByDate(
     List<Transaction> allTransactions,
@@ -132,24 +123,29 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     } else if (_selectedFilterIndex == 1) {
       // MES: 1, 5, 10, 15... (Para no saturar)
       // Mostramos solo múltiplos de 5 y el 1
+      final now = DateTime.now();
+      final totalDays = DateUtils.getDaysInMonth(now.year, now.month);
       final day = index + 1;
-      if (day == 1 || day % 5 == 0) return day.toString();
+
+      if (day == 1 || day % 5 == 0 || day == totalDays) {
+        return day.toString();
+      }
       return ''; // Ocultar otros días para limpieza visual
     } else {
-      // AÑO: E, F, M...
+      // AÑO:
       const months = [
-        'E',
-        'F',
-        'M',
-        'A',
-        'M',
-        'J',
-        'J',
-        'A',
-        'S',
-        'O',
-        'N',
-        'D',
+        'Ene',
+        'Feb',
+        'Mar',
+        'Abr',
+        'May',
+        'Jun',
+        'Jul',
+        'Ago',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dic',
       ];
       if (index >= 0 && index < months.length) return months[index];
     }
@@ -202,33 +198,6 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
             });
 
             categoryStats.sort((a, b) => b.amount.compareTo(a.amount));
-
-            // Datos para la grafica
-            // final Map<int, double> weeklyMap = {
-            //   0: 0,
-            //   1: 0,
-            //   2: 0,
-            //   3: 0,
-            //   4: 0,
-            //   5: 0,
-            //   6: 0,
-            // };
-            // double maxDayAmount = 0;
-
-            // for (var t in filteredExpenses) {
-            //   // weekday devuelve 1 (Lunes) a 7 (Domingo). Restamos 1 para índice 0-6
-            //   final dayIndex = t.date.weekday - 1;
-            //   weeklyMap[dayIndex] = (weeklyMap[dayIndex] ?? 0) + t.amount;
-
-            //   if (weeklyMap[dayIndex]! > maxDayAmount) {
-            //     maxDayAmount = weeklyMap[dayIndex]!;
-            //   }
-            // }
-
-            // final List<FlSpot> spots = [];
-            // for (int i = 0; i < 7; i++) {
-            //   spots.add(FlSpot(i.toDouble(), weeklyMap[i]!));
-            // }
 
             return Column(
               children: [
