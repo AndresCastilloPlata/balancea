@@ -51,5 +51,9 @@
 		<false/>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Necesitamos verificar tu identidad para proteger tus datos financieros.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Necesitamos acceso a tu galería para que puedas cambiar tu foto de perfil.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Necesitamos acceso a tu cámara para tomar tu foto de perfil.</string>
 	</dict>
 </plist>

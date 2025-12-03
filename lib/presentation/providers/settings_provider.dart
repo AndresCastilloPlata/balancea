@@ -6,28 +6,42 @@ class AppSettings {
   final bool isBiometricEnabled;
   final bool areNotificationsEnabled;
 
+  final String userName;
+  final String? avatarPath;
+  final String? pin;
+
   AppSettings({
     this.isDarkTheme = true,
     this.isBiometricEnabled = false,
     this.areNotificationsEnabled = true,
+    this.userName = 'Usuario',
+    this.avatarPath,
+    this.pin,
   });
 
   AppSettings copyWith({
     bool? isDarkTheme,
     bool? isBiometricEnabled,
     bool? areNotificationsEnabled,
+    String? userName,
+    String? avatarPath,
+    String? pin,
   }) {
     return AppSettings(
       isDarkTheme: isDarkTheme ?? this.isDarkTheme,
       isBiometricEnabled: isBiometricEnabled ?? this.isBiometricEnabled,
       areNotificationsEnabled:
           areNotificationsEnabled ?? this.areNotificationsEnabled,
+      userName: userName ?? this.userName,
+      avatarPath: avatarPath ?? this.avatarPath,
+      pin: pin ?? this.pin,
     );
   }
 }
 
 class SettingsNotifier extends StateNotifier<AppSettings> {
   static const String _boxName = 'settingsBox';
+  static const String _transactionsBoxName = 'transactionsBox';
 
   SettingsNotifier() : super(_getInitialState());
 
@@ -42,6 +56,9 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
         'areNotificationsEnabled',
         defaultValue: true,
       ),
+      userName: box.get('userName', defaultValue: 'Usuario'),
+      avatarPath: box.get('avatarPath'), // null por defecto
+      pin: box.get('pin'),
     );
   }
 
@@ -67,6 +84,47 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
 
     final box = await Hive.openBox(_boxName);
     await box.put('isDarkTheme', value);
+  }
+
+  // Perfil
+  void updateProfile({String? name, String? path}) {
+    state = state.copyWith(
+      userName: name ?? state.userName,
+      avatarPath: path ?? state.avatarPath,
+    );
+
+    final box = Hive.box(_boxName);
+    if (name != null) box.put('userName', name);
+    if (path != null) box.put('avatarPath', path);
+  }
+
+  // PIN
+  void setPin(String newPin) {
+    state = state.copyWith(pin: newPin);
+    Hive.box(_boxName).put('pin', newPin);
+  }
+
+  // Borrar datos
+  Future<void> clearAllData() async {
+    final settingsBox = Hive.box(_boxName);
+
+    // 1. Borramos configuración (pero mantenemos el tema oscuro para que no flashée feo)
+    await settingsBox.clear();
+    // Restauramos defaults mínimos
+    await settingsBox.put('isDarkTheme', true);
+
+    // 2. Borramos Transacciones (Si la caja está abierta)
+    if (Hive.isBoxOpen(_transactionsBoxName)) {
+      // Ojo: Verifica el nombre exacto en tu repo
+      await Hive.box(_transactionsBoxName).clear();
+    } else {
+      // Si no está abierta, intentamos abrir y borrar
+      final tBox = await Hive.openBox(_transactionsBoxName);
+      await tBox.clear();
+    }
+
+    // 3. Reseteamos el estado en memoria
+    state = AppSettings(isDarkTheme: true, userName: 'Usuario');
   }
 }
 

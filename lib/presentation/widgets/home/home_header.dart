@@ -1,11 +1,27 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
 
-class HomeHeader extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
+
+class HomeHeader extends ConsumerWidget {
   const HomeHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+
+    String getGreeting() {
+      final hour = DateTime.now().hour;
+      if (hour < 12) return 'Buenos días';
+      if (hour < 18) return 'Buenas tardes';
+      return 'Buenas noches';
+    }
+
+    ImageProvider? avatarImage;
+    if (settings.avatarPath != null) {
+      avatarImage = FileImage(File(settings.avatarPath!));
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -17,15 +33,17 @@ class HomeHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Bienvenido de nuevo',
-                style: textTheme.bodyMedium?.copyWith(color: Colors.grey[400]),
+                getGreeting(),
+
+                style: TextStyle(color: Colors.grey[400], fontSize: 14),
               ),
               const SizedBox(height: 4),
               Text(
-                'Ingeniero',
-                style: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
+                settings.userName,
+                style: const TextStyle(
                   color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -45,10 +63,13 @@ class HomeHeader extends StatelessWidget {
                 ),
               ],
             ),
-            child: const CircleAvatar(
+            child: CircleAvatar(
               radius: 24,
               backgroundColor: Color(0xFF2A2D3E),
-              child: Text('👨‍💻', style: TextStyle(fontSize: 24)),
+              backgroundImage: avatarImage,
+              child: settings.avatarPath == null
+                  ? const Text('👤', style: TextStyle(fontSize: 20))
+                  : null,
             ),
           ),
         ],
