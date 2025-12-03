@@ -19,6 +19,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/auth',
         builder: (context, state) => const BiometricAuthScreen(),
       ),
+      GoRoute(
+        path: '/pin',
+        builder: (context, state) {
+          // Recibimos el parámetro: ¿Es modo creación?
+          // Por defecto false (Modo Ingreso) si no se especifica.
+          final bool isCreation = state.extra as bool? ?? false;
+          return PinScreen(isCreationMode: isCreation);
+        },
+      ),
 
       // Barra de navegacion (ShellRoute)
       StatefulShellRoute.indexedStack(

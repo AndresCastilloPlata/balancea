@@ -1,5 +1,6 @@
 export 'biometric_auth_screen.dart';
 export 'home_screen.dart';
+export 'pin_screen.dart';
 export 'settings_screen.dart';
 export 'splash_screen.dart';
 export 'stats_screen.dart';

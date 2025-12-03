@@ -104,13 +104,8 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
   }
 
   void _enterWithPin() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Módulo de PIN pendiente de implementación"),
-        backgroundColor: Colors.grey,
-      ),
-    );
-    // AQUÍ LUEGO CONECTAREMOS CON LA PANTALLA DE PIN
+    // Navegamos al PIN en modo INGRESO (creation = false)
+    context.go('/pin', extra: false);
   }
 
   @override

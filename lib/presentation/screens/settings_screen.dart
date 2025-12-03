@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -207,11 +208,7 @@ class SettingsScreen extends ConsumerWidget {
                 ? 'Sin seguridad de respaldo'
                 : 'Protegido',
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Módulo de PIN en desarrollo (Siguiente paso)"),
-                ),
-              );
+              context.push('/pin', extra: true);
               // AQUÍ ABRIREMOS LA PANTALLA DE PIN EN EL SIGUIENTE PASO
             },
           ),
