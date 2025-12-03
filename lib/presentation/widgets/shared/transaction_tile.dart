@@ -1,15 +1,21 @@
+import 'package:balancea/config/constants/currency_config.dart';
 import 'package:balancea/config/helpers/currency_helper.dart';
 import 'package:balancea/domain/entities/transaction.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class TransactionTile extends StatelessWidget {
+class TransactionTile extends ConsumerWidget {
   final Transaction transaction;
   final VoidCallback? onTap;
 
   const TransactionTile({super.key, required this.transaction, this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final currency = CurrencyConfig.getCurrency(settings.currencyCode);
+
     final color = transaction.isExpense
         ? const Color(0xFFFF6B6B)
         : const Color(0xFF4ECDC4);
@@ -77,7 +83,7 @@ class TransactionTile extends StatelessWidget {
             ],
           ),
           trailing: Text(
-            '${transaction.isExpense ? "-" : "+"} ${CurrencyHelper.format(transaction.amount)}',
+            '${transaction.isExpense ? "-" : "+"} ${CurrencyHelper.format(transaction.amount, currency)}',
             style: TextStyle(
               color: color,
               fontWeight: FontWeight.bold,

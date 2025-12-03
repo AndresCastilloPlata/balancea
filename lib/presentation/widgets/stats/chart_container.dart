@@ -1,8 +1,11 @@
-import 'package:balancea/config/helpers/currency_helper.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:balancea/config/constants/currency_config.dart';
+import 'package:balancea/config/helpers/currency_helper.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 
-class ChartContainer extends StatelessWidget {
+class ChartContainer extends ConsumerWidget {
   final List<FlSpot> spots;
   final double maxY;
   final double maxX;
@@ -22,7 +25,10 @@ class ChartContainer extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final currency = CurrencyConfig.getCurrency(settings.currencyCode);
+
     if (spots.isEmpty) {
       return const SizedBox(
         height: 300,
@@ -67,7 +73,7 @@ class ChartContainer extends StatelessWidget {
               getTooltipItems: (List<LineBarSpot> touchedSpots) {
                 return touchedSpots.map((barSpot) {
                   return LineTooltipItem(
-                    CurrencyHelper.format(barSpot.y),
+                    CurrencyHelper.format(barSpot.y, currency),
                     const TextStyle(
                       color: Color(0xFF4ECDC4),
                       fontWeight: FontWeight.bold,

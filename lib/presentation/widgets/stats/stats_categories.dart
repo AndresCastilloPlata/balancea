@@ -1,12 +1,18 @@
+import 'package:balancea/config/constants/currency_config.dart';
 import 'package:balancea/config/helpers/currency_helper.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class StatsCategories extends StatelessWidget {
+class StatsCategories extends ConsumerWidget {
   final List<CategoryStat> categories;
   const StatsCategories({super.key, required this.categories});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    final currency = CurrencyConfig.getCurrency(settings.currencyCode);
+
     if (categories.isEmpty) {
       return const Center(
         child: Text(
@@ -31,7 +37,7 @@ class StatsCategories extends StatelessWidget {
 
         itemBuilder: (context, index) {
           final category = categories[index];
-          return _CategoryItem(category: category);
+          return _CategoryItem(category: category, currency: currency);
         },
       ),
     );
@@ -40,7 +46,8 @@ class StatsCategories extends StatelessWidget {
 
 class _CategoryItem extends StatelessWidget {
   final CategoryStat category;
-  const _CategoryItem({required this.category});
+  final AppCurrency currency;
+  const _CategoryItem({required this.category, required this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +90,7 @@ class _CategoryItem extends StatelessWidget {
                 ],
               ),
               Text(
-                CurrencyHelper.format(category.amount),
+                CurrencyHelper.format(category.amount, currency),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w500,

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:balancea/config/constants/currency_config.dart';
 import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -75,6 +76,61 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  void _showCurrencyPicker(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1F222E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Selecciona tu Moneda',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...CurrencyConfig.availableCurrencies.map((currency) {
+                return ListTile(
+                  leading: Text(
+                    currency.symbol,
+                    style: const TextStyle(
+                      color: Color(0xFF4ECDC4),
+                      fontSize: 24,
+                    ),
+                  ),
+                  title: Text(
+                    currency.name,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  subtitle: Text(
+                    currency.code,
+                    style: TextStyle(color: Colors.grey[500]),
+                  ),
+                  onTap: () {
+                    // Guardar selección
+                    ref
+                        .read(settingsProvider.notifier)
+                        .setCurrency(currency.code);
+                    Navigator.pop(context);
+                  },
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   // borrar datos
   void _confirmDeleteData(BuildContext context, WidgetRef ref) {
     showDialog(
@@ -126,6 +182,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final settingsNotifier = ref.read(settingsProvider.notifier);
+    final currencyConfig = CurrencyConfig.getCurrency(settings.currencyCode);
 
     return Scaffold(
       backgroundColor: const Color(0xFF191A22),
@@ -163,8 +220,8 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.attach_money,
             color: const Color(0xFF4ECDC4),
             title: 'Moneda Principal',
-            subtitle: 'COP (Peso Colombiano)',
-            onTap: () {},
+            subtitle: '${currencyConfig.code} (${currencyConfig.name})',
+            onTap: () => _showCurrencyPicker(context, ref),
           ),
           _CustomSettingsTile(
             icon: Icons.notifications_outlined,

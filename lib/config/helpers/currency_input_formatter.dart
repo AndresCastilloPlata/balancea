@@ -1,7 +1,12 @@
+import 'package:balancea/config/constants/currency_config.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 class CurrencyInputFormatter extends TextInputFormatter {
+  final AppCurrency currency;
+
+  CurrencyInputFormatter({required this.currency});
+
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
@@ -12,27 +17,35 @@ class CurrencyInputFormatter extends TextInputFormatter {
       return newValue;
     }
 
+    // Detectar separadores según el locale
+    final format = NumberFormat.currency(locale: currency.locale);
+    final String decimalSep = format.symbols.DECIMAL_SEP; // '.' o ','
+
     // Limpieza inicial
-    String cleanText = newValue.text.replaceAll(RegExp(r'[^0-9,]'), '');
+    String cleanText = newValue.text.replaceAll(
+      RegExp('[^0-9$decimalSep]'),
+      '',
+    );
+    // Evitar múltiples separadores decimales
+    if (cleanText.indexOf(decimalSep) != cleanText.lastIndexOf(decimalSep)) {
+      return oldValue;
+    }
 
-    List<String> parts = cleanText.split(',');
-
+    List<String> parts = cleanText.split(decimalSep);
     // Parte entera
     String integerPart = parts[0];
-
     // Separar parte decimal si existe
     String? decimalPart;
 
     // Limite de 2 decimales
     if (parts.length > 1) {
       decimalPart = parts[1].substring(0, parts[1].length.clamp(0, 2));
-    } else if (cleanText.endsWith(',')) {
-      integerPart = "";
+    } else if (cleanText.endsWith(decimalSep)) {
+      decimalPart = "";
     }
 
     // Formatear la parte entera con puntos de mil
-
-    final formatter = NumberFormat('#,###', 'es_CO');
+    final formatter = NumberFormat('#,###', currency.locale);
     String newText = integerPart;
 
     if (integerPart.isNotEmpty) {
@@ -48,7 +61,7 @@ class CurrencyInputFormatter extends TextInputFormatter {
 
     // Reconstruir el texto final
     if (decimalPart != null) {
-      newText = '$newText,$decimalPart';
+      newText = '$newText$decimalSep$decimalPart';
     }
 
     return TextEditingValue(

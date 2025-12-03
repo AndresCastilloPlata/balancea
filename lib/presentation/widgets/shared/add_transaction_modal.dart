@@ -1,3 +1,5 @@
+import 'package:balancea/config/constants/currency_config.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,18 +37,6 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
   bool _isLoading = false;
   DateTime _selectedDate = DateTime.now();
-
-  // final List<Map<String, String>> expenseCategories = [
-  //   {'icon': '🍔', 'name': 'Comida'},
-  //   {'icon': '🚌', 'name': 'Transporte'},
-  //   {'icon': '💡', 'name': 'Servicios'},
-  // ];
-
-  // final List<Map<String, String>> incomeCategories = [
-  //   {'icon': '💰', 'name': 'Sueldo'},
-  //   {'icon': '🏠', 'name': 'Renta'},
-  //   {'icon': '🎁', 'name': 'Regalo'},
-  // ];
 
   @override
   void initState() {
@@ -86,8 +76,18 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
     });
     try {
       // Limpiar monto
-      String cleanAmount = amountController.text.replaceAll('.', '');
-      cleanAmount = cleanAmount.replaceAll(',', '.');
+      // Leemos la moneda actual para saber cuál es el separador decimal
+      final settings = ref.read(settingsProvider);
+      final currency = CurrencyConfig.getCurrency(settings.currencyCode);
+      final decimalSep = currency.locale == 'en_US' ? '.' : ',';
+      final thousandSep = currency.locale == 'en_US' ? ',' : '.';
+
+      String cleanAmount = amountController.text;
+
+      // Eliminamos separadores de miles
+      cleanAmount = cleanAmount.replaceAll(thousandSep, '');
+      // Reemplazamos separador decimal por punto (formato Dart standard)
+      cleanAmount = cleanAmount.replaceAll(decimalSep, '.');
 
       final double? amount = double.tryParse(cleanAmount);
       if (amount == null || amount <= 0) {
@@ -99,7 +99,6 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
         id: widget.transactionToEdit?.id ?? const Uuid().v4(),
         title: titleController.text,
         amount: amount,
-
         date: _selectedDate,
         isExpense: widget.isExpense,
         categoryEmoji: selectedEmoji,
@@ -164,6 +163,9 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
   @override
   Widget build(BuildContext context) {
+    final settings = ref.watch(settingsProvider);
+    final currency = CurrencyConfig.getCurrency(settings.currencyCode);
+
     final color = widget.isExpense
         ? const Color(0xFFFF6B6B)
         : const Color(0xFF4ECDC4);
@@ -356,7 +358,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                   color: color,
                   isNumber: true,
                   inputFormatters: [
-                    CurrencyInputFormatter(),
+                    CurrencyInputFormatter(currency: currency),
                   ], // Teclado numérico
                 ),
                 const SizedBox(height: 15),

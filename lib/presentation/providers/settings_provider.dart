@@ -10,6 +10,8 @@ class AppSettings {
   final String? avatarPath;
   final String? pin;
 
+  final String currencyCode;
+
   AppSettings({
     this.isDarkTheme = true,
     this.isBiometricEnabled = false,
@@ -17,6 +19,7 @@ class AppSettings {
     this.userName = 'Usuario',
     this.avatarPath,
     this.pin,
+    this.currencyCode = 'COP',
   });
 
   AppSettings copyWith({
@@ -26,6 +29,7 @@ class AppSettings {
     String? userName,
     String? avatarPath,
     String? pin,
+    String? currencyCode,
   }) {
     return AppSettings(
       isDarkTheme: isDarkTheme ?? this.isDarkTheme,
@@ -35,6 +39,7 @@ class AppSettings {
       userName: userName ?? this.userName,
       avatarPath: avatarPath ?? this.avatarPath,
       pin: pin ?? this.pin,
+      currencyCode: currencyCode ?? this.currencyCode,
     );
   }
 }
@@ -59,6 +64,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       userName: box.get('userName', defaultValue: 'Usuario'),
       avatarPath: box.get('avatarPath'), // null por defecto
       pin: box.get('pin'),
+      currencyCode: box.get('currencyCode', defaultValue: 'COP'),
     );
   }
 
@@ -102,6 +108,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   void setPin(String newPin) {
     state = state.copyWith(pin: newPin);
     Hive.box(_boxName).put('pin', newPin);
+  }
+
+  // Moneda
+  void setCurrency(String code) {
+    state = state.copyWith(currencyCode: code);
+    Hive.box(_boxName).put('currencyCode', code);
   }
 
   // Borrar datos

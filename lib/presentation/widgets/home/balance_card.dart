@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:balancea/config/constants/currency_config.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:balancea/presentation/providers/transaction_provider.dart';
 import 'package:balancea/config/helpers/currency_helper.dart';
 
@@ -12,6 +14,9 @@ class BalanceCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final transactionState = ref.watch(transactionListProvider);
     final transactions = transactionState.value ?? [];
+
+    final settings = ref.watch(settingsProvider);
+    final currency = CurrencyConfig.getCurrency(settings.currencyCode);
 
     double totalIncome = 0;
     double totalExpense = 0;
@@ -145,6 +150,7 @@ class BalanceCard extends ConsumerWidget {
                     alignment: Alignment.centerLeft,
                     child: _buildMoneyText(
                       amount: totalBalance,
+                      currency: currency,
                       baseSize: 36,
                       color: Colors.white,
                     ),
@@ -160,6 +166,7 @@ class BalanceCard extends ConsumerWidget {
                           color: const Color(0xFF4ECDC4), // Verde Neon
                           label: 'Ingresos',
                           amount: totalIncome,
+                          currency: currency,
                         ),
                       ),
                       const SizedBox(width: 15),
@@ -171,6 +178,7 @@ class BalanceCard extends ConsumerWidget {
                           color: const Color(0xFFFF6B6B), // Rojo Neon
                           label: 'Gastos',
                           amount: totalExpense,
+                          currency: currency,
                         ),
                       ),
                     ],
@@ -186,13 +194,27 @@ class BalanceCard extends ConsumerWidget {
 
   Widget _buildMoneyText({
     required double amount,
+    required AppCurrency currency,
     required double baseSize,
     required Color color,
   }) {
-    final formatted = CurrencyHelper.format(amount);
-    final parts = formatted.split(',');
-    final integerPart = parts[0];
-    final decimalPart = parts.length > 1 ? ',${parts[1]}' : '';
+    final formatted = CurrencyHelper.format(amount, currency);
+
+    String integerPart = formatted;
+    String decimalPart = '';
+
+    final decimalSeparator = currency.code == 'USD' ? '.' : ',';
+
+    if (formatted.contains(decimalSeparator)) {
+      final parts = formatted.split(decimalSeparator);
+      // Aseguramos que sea la última parte (por si acaso hay separadores de miles iguales)
+      if (parts.length > 1) {
+        integerPart = parts[0];
+        int lastSep = formatted.lastIndexOf(decimalSeparator);
+        integerPart = formatted.substring(0, lastSep);
+        decimalPart = formatted.substring(lastSep); // Incluye el separador
+      }
+    }
 
     return RichText(
       text: TextSpan(
@@ -205,7 +227,7 @@ class BalanceCard extends ConsumerWidget {
               fontSize: baseSize,
               fontWeight: FontWeight.w800,
               letterSpacing: -1.0,
-              fontFamily: 'CupertinoSystemText', // O por defecto
+              // fontFamily: 'CupertinoSystemText', // O por defecto
             ),
           ),
 
@@ -248,21 +270,18 @@ class _GlasStat extends StatelessWidget {
   final Color color;
   final String label;
   final double amount;
+  final AppCurrency currency;
 
   const _GlasStat({
     required this.icon,
     required this.color,
     required this.label,
     required this.amount,
+    required this.currency,
   });
 
   @override
   Widget build(BuildContext context) {
-    //   final formatted = CurrencyHelper.format(amount);
-    // final parts = formatted.split(',');
-    // final integerPart = parts[0];
-    // final decimalPart = parts.length > 1 ? ',${parts[1]}' : '';
-
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
       decoration: BoxDecoration(
@@ -301,7 +320,7 @@ class _GlasStat extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    CurrencyHelper.format(amount),
+                    CurrencyHelper.format(amount, currency),
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
