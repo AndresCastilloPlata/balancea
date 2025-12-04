@@ -1,4 +1,5 @@
 import 'package:balancea/presentation/providers/settings_provider.dart';
+import 'package:balancea/presentation/widgets/shared/banner_ad_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -16,7 +17,7 @@ class HomeScreen extends ConsumerWidget {
         child: Column(
           children: [
             // zona fija
-            HomeHeader(),
+            const HomeHeader(),
 
             // --- AVISO DE SEGURIDAD (Solo si no hay PIN) ---
             if (settings.pin == null)
@@ -65,14 +66,16 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: BalanceCard(),
             ),
-            SizedBox(height: 30),
-            HomeQuickActions(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
+            const BannerAdContainer(),
+            const SizedBox(height: 20),
+            const HomeQuickActions(),
+            const SizedBox(height: 20),
 
             // zona titulo fijo
             Padding(

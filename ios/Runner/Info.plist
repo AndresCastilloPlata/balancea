@@ -55,5 +55,7 @@
 		<string>Necesitamos acceso a tu galería para que puedas cambiar tu foto de perfil.</string>
 		<key>NSCameraUsageDescription</key>
 		<string>Necesitamos acceso a tu cámara para tomar tu foto de perfil.</string>
+		<key>GADApplicationIdentifier</key>
+    	<string>ca-app-pub-4340994501227249~6614949158</string>
 	</dict>
 </plist>

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:balancea/config/router/app_router.dart';
@@ -21,6 +22,9 @@ void main() async {
   Hive.registerAdapter(TransactionAdapter());
 
   await Hive.openBox('settingsBox');
+
+  // AdMob
+  await MobileAds.instance.initialize();
 
   runApp(ProviderScope(child: Balancea()));
 }
