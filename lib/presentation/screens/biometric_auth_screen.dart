@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -54,24 +53,24 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
         persistAcrossBackgrounding: true,
       );
     } catch (e) {
+      debugPrint("Info Biometría: $e");
+
       if (!mounted) return;
 
-      String errorCode = 'unknown';
-      if (e is PlatformException) {
-        errorCode = e.code;
-      }
+      final String errorString = e.toString();
 
-      if (errorCode == 'userCanceled' || errorCode == 'auth_in_progress') {
+      if (errorString.contains('userCanceled') ||
+          errorString.contains('auth_in_progress')) {
         setState(() {
           _message = 'Ingreso cancelado';
           _icon = Icons.cancel_outlined;
           _iconColor = Colors.orange;
         });
-      } else if (errorCode == 'NotAvailable') {
+      } else if (errorString.contains('NotAvailable')) {
         setState(() => _message = 'Biometría no disponible');
-      } else if (errorCode == 'LockedOut') {
+      } else if (errorString.contains('LockedOut')) {
         setState(() {
-          _message = 'Bloqueado temporalmente por intentos fallidos';
+          _message = 'Bloqueado temporalmente';
           _icon = Icons.timer;
           _iconColor = Colors.red;
         });
@@ -92,15 +91,16 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
 
     if (authenticated) {
       context.go('/home');
-    } else {
-      if (_message == 'Escanea tu rostro o huella') {
-        setState(() {
-          _message = 'No pudimos verificar tu identidad';
-          _icon = Icons.lock_person;
-          _iconColor = Colors.redAccent;
-        });
-      }
     }
+    // else {
+    //   if (_message == 'Escanea tu rostro o huella') {
+    //     setState(() {
+    //       _message = 'No pudimos verificar tu identidad';
+    //       _icon = Icons.lock_person;
+    //       _iconColor = Colors.redAccent;
+    //     });
+    //   }
+    // }
   }
 
   void _enterWithPin() {
@@ -113,87 +113,90 @@ class _BiometricAuthScreenState extends State<BiometricAuthScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF191A22),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 30),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
 
-          children: [
-            // Icono animado o estático
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              padding: const EdgeInsets.all(30),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: _iconColor.withValues(alpha: 0.1),
-                border: Border.all(
-                  color: _iconColor.withValues(alpha: 0.5),
-                  width: 2,
+            children: [
+              // Icono animado o estático
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(30),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _iconColor.withValues(alpha: 0.1),
+                  border: Border.all(
+                    color: _iconColor.withValues(alpha: 0.5),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(_icon, size: 60, color: _iconColor),
+              ),
+              const SizedBox(height: 40),
+
+              const Text(
+                'Balancea Protegido',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              child: Icon(_icon, size: 60, color: _iconColor),
-            ),
-            const SizedBox(height: 40),
 
-            const Text(
-              'Balancea Protegido',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
+              const SizedBox(height: 10),
+              Text(
+                _message,
+                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                textAlign: TextAlign.center,
               ),
-            ),
+              const SizedBox(height: 50),
 
-            const SizedBox(height: 10),
-            Text(
-              _message,
-              style: TextStyle(color: Colors.grey[400], fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 50),
-
-            // Botón por si falla el automático o el usuario canceló
-            if (!_isAuthenticating) ...[
-              // 1. Botón Principal: Reintentar Biometría
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: _authenticate,
-                  icon: const Icon(Icons.face),
-                  label: const Text("Usar FaceID / Huella"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4ECDC4),
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+              // Botón por si falla el automático o el usuario canceló
+              if (!_isAuthenticating) ...[
+                // 1. Botón Principal: Reintentar Biometría
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    onPressed: _authenticate,
+                    icon: const Icon(Icons.face),
+                    label: const Text("Usar FaceID / Huella"),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF4ECDC4),
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // 2. Botón Secundario: Usar PIN
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: OutlinedButton.icon(
-                  onPressed: _enterWithPin,
-                  icon: const Icon(Icons.dialpad),
-                  label: const Text("Ingresar con PIN"),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    side: const BorderSide(color: Colors.grey),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                // 2. Botón Secundario: Usar PIN
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    onPressed: _enterWithPin,
+                    icon: const Icon(Icons.dialpad),
+                    label: const Text("Ingresar con PIN"),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.grey),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ] else ...[
-              // Si está autenticando, mostramos loader
-              const CircularProgressIndicator(color: Color(0xFF4ECDC4)),
+              ] else ...[
+                // Si está autenticando, mostramos loader
+                const CircularProgressIndicator(color: Color(0xFF4ECDC4)),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

@@ -7,7 +7,7 @@ class CurrencyHelper {
       locale: currency.locale,
       symbol: '${currency.symbol} ',
       decimalDigits: currency.decimals,
-      // customPattern: '\u00A4 #,##0.00',
+      customPattern: '\u00A4 #,##0.00',
     );
 
     return formatter.format(amount);

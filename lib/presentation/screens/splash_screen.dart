@@ -45,7 +45,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _checkBiometricsAndNavigate() async {
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) {
       return;
@@ -56,6 +56,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // Desicion:
     if (settings.isBiometricEnabled) {
       context.go('/auth');
+    } else if (settings.pin != null) {
+      context.go('/pin', extra: false);
     } else {
       context.go('/home');
     }

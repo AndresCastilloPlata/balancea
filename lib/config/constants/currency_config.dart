@@ -21,7 +21,7 @@ class CurrencyConfig {
       name: 'Peso Colombiano',
       symbol: '\$',
       locale: 'es_CO',
-      decimals: 0, // Visualmente solemos ocultar decimales en COP
+      decimals: 2, // Visualmente solemos ocultar decimales en COP
     ),
     AppCurrency(
       code: 'USD',
