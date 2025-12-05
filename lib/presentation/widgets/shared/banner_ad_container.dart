@@ -1,15 +1,17 @@
 import 'package:balancea/config/helpers/ad_helper.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-class BannerAdContainer extends StatefulWidget {
+class BannerAdContainer extends ConsumerStatefulWidget {
   const BannerAdContainer({super.key});
 
   @override
-  State<BannerAdContainer> createState() => _BannerAdContainerState();
+  ConsumerState<BannerAdContainer> createState() => _BannerAdContainerState();
 }
 
-class _BannerAdContainerState extends State<BannerAdContainer> {
+class _BannerAdContainerState extends ConsumerState<BannerAdContainer> {
   BannerAd? _bannerAd;
   bool _isLoaded = false;
 
@@ -25,11 +27,7 @@ class _BannerAdContainerState extends State<BannerAdContainer> {
       size: AdSize.banner, // Tamaño estándar (320x50)
       adUnitId: AdHelper.homeBannerAdUnitId,
       listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _isLoaded = true;
-          });
-        },
+        onAdLoaded: (ad) => setState(() => _isLoaded = true),
         onAdFailedToLoad: (ad, error) {
           debugPrint('Fallo al cargar el banner: ${error.message}');
           ad.dispose(); // Liberar memoria
@@ -50,6 +48,11 @@ class _BannerAdContainerState extends State<BannerAdContainer> {
 
   @override
   Widget build(BuildContext context) {
+    final isPremium = ref.watch(settingsProvider).isPremium;
+
+    if (isPremium) {
+      return SizedBox.shrink();
+    }
     // si no ha cargado, no se muestra
     if (!_isLoaded || _bannerAd == null) {
       return const SizedBox.shrink();

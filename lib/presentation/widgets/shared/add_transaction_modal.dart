@@ -243,7 +243,48 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                       if (index == currentCategories.length) {
                         return GestureDetector(
                           onTap: () {
-                            // TODO: Implementar lógica de límites Free vs Premium
+                            if (!settings.isPremium) {
+                              // Mostrar alerta de bloqueo
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: const Color(0xFF2A2D3E),
+                                  icon: const Icon(
+                                    Icons.star,
+                                    color: Color(0xFFFFD700),
+                                    size: 40,
+                                  ),
+                                  title: const Text(
+                                    "Función Premium",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  content: const Text(
+                                    "Crear categorías personalizadas es exclusivo para usuarios Premium.",
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text(
+                                        "Entendido",
+                                        style: TextStyle(
+                                          color: Color(0xFF4ECDC4),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            } else {
+                              // Lógica de crear categoría (Futuro)
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    "Crear categoría: Próximamente",
+                                  ),
+                                ),
+                              );
+                            }
                           },
                           child: Container(
                             margin: const EdgeInsets.only(right: 12),

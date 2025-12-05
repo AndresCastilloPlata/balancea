@@ -12,6 +12,8 @@ class AppSettings {
 
   final String currencyCode;
 
+  final bool isPremium;
+
   AppSettings({
     this.isDarkTheme = true,
     this.isBiometricEnabled = false,
@@ -20,6 +22,7 @@ class AppSettings {
     this.avatarPath,
     this.pin,
     this.currencyCode = 'COP',
+    this.isPremium = false,
   });
 
   AppSettings copyWith({
@@ -30,6 +33,7 @@ class AppSettings {
     String? avatarPath,
     String? pin,
     String? currencyCode,
+    bool? isPremium,
   }) {
     return AppSettings(
       isDarkTheme: isDarkTheme ?? this.isDarkTheme,
@@ -40,6 +44,7 @@ class AppSettings {
       avatarPath: avatarPath ?? this.avatarPath,
       pin: pin ?? this.pin,
       currencyCode: currencyCode ?? this.currencyCode,
+      isPremium: isPremium ?? this.isPremium,
     );
   }
 }
@@ -65,6 +70,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
       avatarPath: box.get('avatarPath'), // null por defecto
       pin: box.get('pin'),
       currencyCode: box.get('currencyCode', defaultValue: 'COP'),
+      isPremium: box.get('isPremium', defaultValue: false),
     );
   }
 
@@ -108,6 +114,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   void setPin(String newPin) {
     state = state.copyWith(pin: newPin);
     Hive.box(_boxName).put('pin', newPin);
+  }
+
+  // Premium
+  void setPremium(bool value) {
+    state = state.copyWith(isPremium: value);
+    Hive.box(_boxName).put('isPremium', value);
   }
 
   // Moneda

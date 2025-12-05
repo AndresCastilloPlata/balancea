@@ -178,6 +178,50 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
+  void _showPremiumDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2A2D3E),
+        icon: const Icon(Icons.star, color: Color(0xFFFFD700), size: 40),
+        title: const Text('Sé Premium', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Obtén acceso ilimitado:\n\n'
+          '• Sin anuncios\n'
+          '• Copia de seguridad\n'
+          '• Categorías personalizadas\n',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4ECDC4),
+            ),
+            onPressed: () {
+              // SIMULAMOS LA COMPRA
+              ref.read(settingsProvider.notifier).setPremium(true);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('¡Bienvenido a Premium! 🌟')),
+              );
+            },
+            child: const Text(
+              'Comprar (Simulado)',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
@@ -202,6 +246,7 @@ class SettingsScreen extends ConsumerWidget {
           _ProfileCard(
             userName: settings.userName,
             imagePath: settings.avatarPath,
+            isPremium: settings.isPremium,
             onEditName: () =>
                 _showEditNameDialog(context, ref, settings.userName),
             onEditImage: () => _pickImage(ref),
@@ -209,12 +254,13 @@ class SettingsScreen extends ConsumerWidget {
           const SizedBox(height: 30),
 
           // Banner Premium
-          _PremiumBanner(),
-          const SizedBox(height: 30),
+          if (!settings.isPremium) ...[
+            _PremiumBanner(() => _showPremiumDialog(context, ref)),
+            const SizedBox(height: 30),
+          ],
 
           // General
           _SectionHeader(title: 'General'),
-          const SizedBox(height: 25),
 
           _CustomSettingsTile(
             icon: Icons.attach_money,
@@ -278,9 +324,19 @@ class SettingsScreen extends ConsumerWidget {
             icon: Icons.cloud_upload_outlined,
             color: Colors.blueAccent,
             title: 'Copia de Seguridad',
-            subtitle: 'Solo Premium',
-            onTap: () {},
-            isLocked: true, // Candado visual
+            subtitle: settings.isPremium ? 'Sincronizar ahora' : 'Solo Premium',
+            isLocked: !settings.isPremium, // Candado visual
+            onTap: () {
+              if (!settings.isPremium) {
+                _showPremiumDialog(context, ref);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Funcionalidad de Backup en desarrollo'),
+                  ),
+                );
+              }
+            },
           ),
 
           _CustomSettingsTile(
@@ -299,6 +355,20 @@ class SettingsScreen extends ConsumerWidget {
               style: TextStyle(color: Colors.grey[700], fontSize: 12),
             ),
           ),
+
+          // BOTÓN DE DESARROLLADOR: Resetear Premium (Para que puedas probar)
+          // Esto es solo para ti, para volver a ser Free y probar los anuncios de nuevo
+          if (settings.isPremium)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: TextButton(
+                onPressed: () => settingsNotifier.setPremium(false),
+                child: const Text(
+                  "Dev: Volver a modo Gratuito",
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -417,58 +487,62 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _PremiumBanner extends StatelessWidget {
-  const _PremiumBanner();
+  final VoidCallback onTap;
+  const _PremiumBanner(this.onTap);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          colors: [
-            Color(0xFF7C4DFF),
-            Color(0xFF4ECDC4),
-          ], // Gradiente Violeta -> Turquesa
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF7C4DFF),
+              Color(0xFF4ECDC4),
+            ], // Gradiente Violeta -> Turquesa
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
         ),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.star, color: Colors.white, size: 40),
-          const SizedBox(width: 15),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Pásate a Premium',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+        child: Row(
+          children: [
+            const Icon(Icons.star, color: Colors.white, size: 40),
+            const SizedBox(width: 15),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Pásate a Premium',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
-                Text(
-                  'Sincronización en la nube y sin anuncios.',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
-                ),
-              ],
+                  Text(
+                    'Sincronización en la nube y sin anuncios.',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'VER',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+              ),
             ),
-            child: const Text(
-              'VER',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -479,12 +553,14 @@ class _ProfileCard extends StatelessWidget {
   final String? imagePath;
   final VoidCallback onEditName;
   final VoidCallback onEditImage;
+  final bool isPremium;
 
   const _ProfileCard({
     required this.userName,
     this.imagePath,
     required this.onEditName,
     required this.onEditImage,
+    required this.isPremium,
   });
 
   @override
@@ -573,19 +649,27 @@ class _ProfileCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
+
+                // Tipo usuario
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
+                    color: isPremium
+                        ? const Color(0xFFFFD700).withValues(
+                            alpha: 0.15,
+                          ) // Dorado si es premium
+                        : Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Usuario Gratuito',
+                  child: Text(
+                    isPremium ? 'Usuario Premium' : 'Usuario Gratuito',
                     style: TextStyle(
-                      color: Color(0xFF4ECDC4),
+                      color: isPremium
+                          ? const Color(0xFFFFD700)
+                          : const Color(0xFF4ECDC4),
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
                     ),
