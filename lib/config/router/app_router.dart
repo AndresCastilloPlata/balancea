@@ -36,6 +36,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
+      GoRoute(
+        path: '/categories',
+        builder: (context, state) => const CategoriesManagerScreen(),
+      ),
+
       // Barra de navegacion (ShellRoute)
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

@@ -1,4 +1,5 @@
 export 'biometric_auth_screen.dart';
+export 'categories_manager_screen.dart';
 export 'create_category_screen.dart';
 export 'home_screen.dart';
 export 'pin_screen.dart';

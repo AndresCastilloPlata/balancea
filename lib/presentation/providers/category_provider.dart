@@ -79,6 +79,22 @@ class CategoryList extends _$CategoryList {
     state = AsyncData(_box!.values.toList());
   }
 
+  // Editar categoria
+  Future<void> editCategory(
+    Category category, {
+    required String name,
+    required String emoji,
+    required int colorValue,
+  }) async {
+    category.name = name;
+    category.emoji = emoji;
+    category.colorValue = colorValue;
+
+    await category.save();
+
+    state = AsyncData(_box!.values.toList());
+  }
+
   Future<void> deleteCategory(Category category) async {
     // No borra categorias base
     if (!category.isCustom) return;

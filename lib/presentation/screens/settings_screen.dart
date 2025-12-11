@@ -1,11 +1,12 @@
 import 'dart:io';
 
-import 'package:balancea/config/constants/currency_config.dart';
-import 'package:balancea/presentation/providers/settings_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+
+import 'package:balancea/config/constants/currency_config.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -269,6 +270,18 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: '${currencyConfig.code} (${currencyConfig.name})',
             onTap: () => _showCurrencyPicker(context, ref),
           ),
+
+          _CustomSettingsTile(
+            icon: Icons.category_rounded,
+            color: const Color(0xFF6C5CE7),
+            title: 'Categorías',
+            subtitle: 'Administra tus gastos e ingresos',
+            onTap: () {
+              // Navegamos a la pantalla de gestión
+              context.push('/categories');
+            },
+          ),
+
           _CustomSettingsTile(
             icon: Icons.notifications_outlined,
             color: Colors.orangeAccent,
@@ -312,7 +325,6 @@ class SettingsScreen extends ConsumerWidget {
                 : 'Protegido',
             onTap: () {
               context.push('/pin', extra: true);
-              // AQUÍ ABRIREMOS LA PANTALLA DE PIN EN EL SIGUIENTE PASO
             },
           ),
           const SizedBox(height: 25),

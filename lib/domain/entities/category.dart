@@ -7,11 +7,11 @@ class Category extends HiveObject {
   @HiveField(0)
   final String id;
   @HiveField(1)
-  final String name;
+  String name;
   @HiveField(2)
-  final String emoji;
+  String emoji;
   @HiveField(3)
-  final int colorValue;
+  int colorValue;
   @HiveField(4)
   final bool isExpense;
   @HiveField(5)
