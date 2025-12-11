@@ -1,5 +1,4 @@
-import 'package:balancea/config/constants/currency_config.dart';
-import 'package:balancea/presentation/providers/settings_provider.dart';
+import 'package:balancea/presentation/providers/category_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import 'package:balancea/config/constants/categories_config.dart';
 import 'package:balancea/config/helpers/currency_input_formatter.dart';
 import 'package:balancea/domain/entities/transaction.dart';
 import 'package:balancea/presentation/providers/transaction_provider.dart';
+import 'package:balancea/config/constants/currency_config.dart';
+import 'package:balancea/presentation/providers/settings_provider.dart';
 
 class AddTransactionModal extends ConsumerStatefulWidget {
   final bool isExpense;
@@ -52,9 +52,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
       selectedEmoji = transaction.categoryEmoji;
       _selectedDate = transaction.date;
     } else {
-      selectedEmoji = widget.isExpense
-          ? CategoriesConfig.defaultExpenses.first
-          : CategoriesConfig.defaultIncomes.first;
+      selectedEmoji = '';
       _selectedDate = DateTime.now();
     }
   }
@@ -69,7 +67,11 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
   Future<void> _saveTransaction() async {
     // Valida que no este vacio
-    if (titleController.text.isEmpty || amountController.text.isEmpty) return;
+    if (titleController.text.isEmpty ||
+        amountController.text.isEmpty ||
+        selectedEmoji.isEmpty) {
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -84,9 +86,9 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
 
       String cleanAmount = amountController.text;
 
-      // Eliminamos separadores de miles
+      // Elimina separadores de miles
       cleanAmount = cleanAmount.replaceAll(thousandSep, '');
-      // Reemplazamos separador decimal por punto (formato Dart standard)
+      // Reemplaza separador decimal por punto (formato Dart standard)
       cleanAmount = cleanAmount.replaceAll(decimalSep, '.');
 
       final double? amount = double.tryParse(cleanAmount);
@@ -103,6 +105,7 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
         isExpense: widget.isExpense,
         categoryEmoji: selectedEmoji,
         note: noteController.text,
+        imagePath: widget.transactionToEdit?.imagePath,
       );
 
       if (widget.transactionToEdit == null) {
@@ -165,14 +168,11 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
   Widget build(BuildContext context) {
     final settings = ref.watch(settingsProvider);
     final currency = CurrencyConfig.getCurrency(settings.currencyCode);
+    final categoriesAsync = ref.watch(categoryListProvider);
 
     final color = widget.isExpense
         ? const Color(0xFFFF6B6B)
         : const Color(0xFF4ECDC4);
-
-    final currentCategories = widget.isExpense
-        ? CategoriesConfig.defaultExpenses
-        : CategoriesConfig.defaultIncomes;
 
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
@@ -234,146 +234,181 @@ class _AddTransactionModalState extends ConsumerState<AddTransactionModal> {
                   style: TextStyle(color: Colors.grey[400], fontSize: 14),
                 ),
                 const SizedBox(height: 10),
+
                 SizedBox(
                   height: 90,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: currentCategories.length + 1,
-                    itemBuilder: (BuildContext context, int index) {
-                      if (index == currentCategories.length) {
-                        return GestureDetector(
-                          onTap: () {
-                            if (!settings.isPremium) {
-                              // Mostrar alerta de bloqueo
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  backgroundColor: const Color(0xFF2A2D3E),
-                                  icon: const Icon(
-                                    Icons.star,
-                                    color: Color(0xFFFFD700),
-                                    size: 40,
-                                  ),
-                                  title: const Text(
-                                    "Función Premium",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  content: const Text(
-                                    "Crear categorías personalizadas es exclusivo para usuarios Premium.",
-                                    style: TextStyle(color: Colors.white70),
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text(
-                                        "Entendido",
-                                        style: TextStyle(
-                                          color: Color(0xFF4ECDC4),
+                  child: categoriesAsync.when(
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
+                    error: (err, stack) => Text(
+                      'Error: $err',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    data: (allCategories) {
+                      // filtra por tipo Gasto|Ingreso
+                      final currentCategories = allCategories
+                          .where((c) => c.isExpense == widget.isExpense)
+                          .toList();
+                      if (selectedEmoji.isEmpty &&
+                          currentCategories.isNotEmpty) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          setState(() {
+                            selectedEmoji = currentCategories.first.emoji;
+                          });
+                        });
+                      }
+
+                      return ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: currentCategories.length + 1,
+                        itemBuilder: (BuildContext context, int index) {
+                          // Boton crear categoria
+                          if (index == currentCategories.length) {
+                            return GestureDetector(
+                              onTap: () {
+                                if (!settings.isPremium) {
+                                  // Mostrar alerta de bloqueo
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                      backgroundColor: const Color(0xFF2A2D3E),
+                                      icon: const Icon(
+                                        Icons.star,
+                                        color: Color(0xFFFFD700),
+                                        size: 40,
+                                      ),
+                                      title: const Text(
+                                        "Categorías Ilimitadas",
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      content: const Text(
+                                        "Personaliza tu contabilidad creando tus propias categorías. ¡Solo para Premium!",
+                                        style: TextStyle(color: Colors.white70),
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+
+                                          child: const Text("Entendido"),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                } else {
+                                  context
+                                      .push(
+                                        '/create-category',
+                                        extra: widget.isExpense,
+                                      )
+                                      .then((_) {});
+                                }
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.only(right: 12),
+                                width: 60,
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2A2D3E),
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.grey.withValues(
+                                            alpha: 0.3,
+                                          ),
                                         ),
                                       ),
+                                      child: const Icon(
+                                        Icons.add,
+                                        color: Colors.white,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 5),
+                                    const Text(
+                                      "Crear",
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.grey,
+                                      ),
+                                      textAlign: TextAlign.center,
                                     ),
                                   ],
                                 ),
-                              );
-                            } else {
-                              // Lógica de crear categoría (Futuro)
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                    "Crear categoría: Próximamente",
-                                  ),
-                                ),
-                              );
-                            }
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            width: 60,
-                            child: Column(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF2A2D3E),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.grey.withValues(alpha: 0.3),
+                              ),
+                            );
+                          }
+
+                          // item normales
+                          final category = currentCategories[index];
+                          final isSelected = category.emoji == selectedEmoji;
+
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                selectedEmoji = category.emoji;
+                              });
+                            },
+                            onLongPress: () {
+                              // Todo: Aquí implementaremos borrar más adelante
+                              if (category.isCustom) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      "Mantén presionado para borrar (Pronto)",
                                     ),
                                   ),
-                                  child: const Icon(
-                                    Icons.add,
-                                    color: Colors.white,
-                                    size: 24,
+                                );
+                              }
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              width: 65,
+
+                              child: Column(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: isSelected
+                                          ? color.withValues(alpha: 0.2)
+                                          : const Color(0xFF2A2D3E),
+                                      shape: BoxShape.circle,
+                                      border: isSelected
+                                          ? Border.all(color: color, width: 2)
+                                          : null,
+                                    ),
+                                    child: Text(
+                                      category.emoji,
+                                      style: const TextStyle(fontSize: 24),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 5),
-                                const Text(
-                                  "Crear",
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey,
+                                  const SizedBox(height: 5),
+
+                                  // Nombre categoria
+                                  Text(
+                                    category.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: isSelected
+                                          ? color
+                                          : Colors.grey[400],
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      }
-
-                      // item normales
-                      final emoji = currentCategories[index];
-                      final name = CategoriesConfig.getName(emoji);
-                      final isSelected = emoji == selectedEmoji;
-
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedEmoji = emoji;
-                          });
+                          );
                         },
-                        child: Container(
-                          margin: const EdgeInsets.only(right: 12),
-                          width: 65,
-
-                          child: Column(
-                            children: [
-                              AnimatedContainer(
-                                duration: const Duration(milliseconds: 200),
-                                padding: const EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? color.withValues(alpha: 0.2)
-                                      : const Color(0xFF2A2D3E),
-                                  shape: BoxShape.circle,
-                                  border: isSelected
-                                      ? Border.all(color: color, width: 2)
-                                      : null,
-                                ),
-                                child: Text(
-                                  emoji,
-                                  style: const TextStyle(fontSize: 24),
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-
-                              // Nombre categoria
-                              Text(
-                                name,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 10, // Letra pequeña
-                                  color: isSelected ? color : Colors.grey[400],
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        ),
                       );
                     },
                   ),

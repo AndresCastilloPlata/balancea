@@ -1,53 +1,47 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'transaction.dart';
+part of 'category.dart';
 
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
 
-class TransactionAdapter extends TypeAdapter<Transaction> {
+class CategoryAdapter extends TypeAdapter<Category> {
   @override
-  final int typeId = 0;
+  final int typeId = 1;
 
   @override
-  Transaction read(BinaryReader reader) {
+  Category read(BinaryReader reader) {
     final numOfFields = reader.readByte();
     final fields = <int, dynamic>{
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
-    return Transaction(
+    return Category(
       id: fields[0] as String,
-      title: fields[1] as String,
-      amount: fields[2] as double,
-      date: fields[3] as DateTime,
+      name: fields[1] as String,
+      emoji: fields[2] as String,
+      colorValue: fields[3] as int,
       isExpense: fields[4] as bool,
-      categoryEmoji: fields[5] as String,
-      note: fields[6] as String?,
-      imagePath: fields[7] as String?,
+      isCustom: fields[5] as bool,
     );
   }
 
   @override
-  void write(BinaryWriter writer, Transaction obj) {
+  void write(BinaryWriter writer, Category obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.title)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.amount)
+      ..write(obj.emoji)
       ..writeByte(3)
-      ..write(obj.date)
+      ..write(obj.colorValue)
       ..writeByte(4)
       ..write(obj.isExpense)
       ..writeByte(5)
-      ..write(obj.categoryEmoji)
-      ..writeByte(6)
-      ..write(obj.note)
-      ..writeByte(7)
-      ..write(obj.imagePath);
+      ..write(obj.isCustom);
   }
 
   @override
@@ -56,7 +50,7 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is TransactionAdapter &&
+      other is CategoryAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

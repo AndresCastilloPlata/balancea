@@ -18,6 +18,8 @@ class Transaction extends HiveObject {
   final String categoryEmoji;
   @HiveField(6)
   final String? note;
+  @HiveField(7)
+  final String? imagePath;
 
   Transaction({
     required this.id,
@@ -27,5 +29,6 @@ class Transaction extends HiveObject {
     required this.isExpense,
     required this.categoryEmoji,
     this.note,
+    this.imagePath,
   });
 }

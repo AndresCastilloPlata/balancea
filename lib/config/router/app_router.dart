@@ -28,6 +28,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return PinScreen(isCreationMode: isCreation);
         },
       ),
+      GoRoute(
+        path: '/create-category',
+        builder: (context, state) {
+          final bool isExpense = state.extra as bool? ?? true;
+          return CreateCategoryScreen(isExpense: isExpense);
+        },
+      ),
 
       // Barra de navegacion (ShellRoute)
       StatefulShellRoute.indexedStack(
